@@ -27,6 +27,9 @@ export function Configuration() {
                 ['port', 'Integer', '9092', 'TCP port on which the Netty server listens for both client connections and inbound Raft RPC traffic from peers.'],
                 ['data-dir', 'String', './data', 'Root directory for all persistent state. DRMQ creates subdirectories here for raft/ (log + metadata) and store/ (topic segments + indexes). Point this at an NVMe-backed path in production.'],
                 ['peers', 'String', 'none', 'Comma-separated list of peer addresses in host:port format, e.g. localhost:9093,localhost:9094. Omit the node\'s own address. Empty means standalone (single-node) mode with no replication.'],
+                ['log-segment-bytes', 'Long', '100MB', 'Maximum size in bytes of a single partition log segment before it is rolled. Default is 104857600 (100MB).'],
+                ['log-retention-ms', 'Long', '7 Days', 'Time in milliseconds to keep inactive log segments before they are deleted. Default is 604800000 (7 days).'],
+                ['raft-compact-threshold', 'Long', '1000', 'Number of applied Raft log entries required to trigger an asynchronous disk compaction of the internal consensus log. Default is 1000 entries.'],
               ].map(([arg, type, def, desc]) => (
                 <tr key={arg} className="hover:bg-slate-700/20 transition-colors">
                   <td className="px-6 py-4 font-mono text-cyan-400 font-semibold align-top">{arg}</td>
