@@ -9,7 +9,7 @@ export function Introduction() {
       <h1 className="text-4xl font-bold text-white mb-6">Introduction</h1>
       
       <p className="text-lg text-slate-300 mb-6 leading-relaxed">
-        DRMQ (Distributed Reliable Message Queue) is a high-performance, fault-tolerant event streaming platform engineered from the ground up to provide uncompromising data durability and strict global ordering. At its core, DRMQ is built on a highly optimized implementation of the Raft consensus algorithm, ensuring that your distributed infrastructure remains resilient even in the face of unpredictable network partitions and catastrophic hardware failures.
+        DRMQ (Distributed Reliable Message Queue) is a high-performance, fault-tolerant message queue engineered from the ground up to provide uncompromising data durability and strict global ordering. At its core, DRMQ is built on a highly optimized implementation of the Raft consensus algorithm, ensuring that your distributed infrastructure remains resilient even in the face of unpredictable network partitions and catastrophic hardware failures.
       </p>
 
       <p className="text-slate-400 mb-6 leading-relaxed">
