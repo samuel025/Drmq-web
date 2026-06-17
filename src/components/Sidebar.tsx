@@ -1,4 +1,3 @@
-import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { Book, Cpu, Layers, HardDrive, Network, Settings, Terminal, ShieldAlert, X } from 'lucide-react';
 

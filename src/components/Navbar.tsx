@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Moon, Sun, Menu, GitBranch } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Moon, Sun, Menu, GitBranch } from 'lucide-react';
 
 interface NavbarProps {
   onMenuClick: () => void;
