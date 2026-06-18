@@ -1,3 +1,4 @@
+import React from 'react';
 
 export function Storage() {
   return (
@@ -33,13 +34,30 @@ export function Storage() {
       </p>
 
       <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Compaction Candidate Files</h2>
-      <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-5">
+      <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-5 mb-10">
         <p className="text-slate-300 text-sm leading-relaxed">
           Because of the segmented design, older completed segments (e.g., <code>00000000.log</code>) become immutable. 
           When topic retention policies run, DRMQ can simply delete the oldest files instantly, without 
           needing to parse or rewrite active data.
         </p>
       </div>
+
+      <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Follower Reads (Single Mode Only)</h2>
+      <p className="text-slate-300 mb-4 leading-relaxed">
+        While the Raft Leader must handle 100% of the write traffic, DRMQ allows <strong>Single Mode</strong> consumers to completely bypass the leader for read operations. This dramatically increases the overall read-throughput of your cluster.
+      </p>
+      <div className="bg-cyan-900/10 border border-cyan-800/30 rounded-lg p-5">
+        <p className="text-cyan-200/80 text-sm leading-relaxed mb-4">
+          Because the <code>MessageStore</code> is asynchronously replicated by Raft across all nodes, any Follower node can serve a raw, uncoordinated <code>ConsumeRequest</code> using its local, replicated copy of the MessageStore. This means a 5-node cluster has 5x the read capacity of a 1-node cluster for Single Mode replay or analytics workloads.
+        </p>
+        <p className="text-cyan-200/80 text-sm leading-relaxed font-semibold">
+          Note: Follower Reads are intentionally disabled for Group Mode!
+        </p>
+        <p className="text-cyan-200/80 text-sm leading-relaxed mt-2">
+          If Group Mode consumers were allowed to fetch from followers, two different followers could independently grant leases for the exact same message to two different consumers, completely destroying ordering and exactly-once delivery semantics. To prevent this, if a Group Mode consumer attempts to poll a follower, the follower rejects the request with a <code>NOT_LEADER</code> payload, and the client automatically redirects to the current Leader.
+        </p>
+      </div>
+
     </div>
   );
 }

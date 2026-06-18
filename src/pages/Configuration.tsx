@@ -1,3 +1,4 @@
+import React from 'react';
 
 export function Configuration() {
   return (
@@ -49,8 +50,8 @@ export function Configuration() {
       
       <div className="mt-8 p-5 bg-cyan-900/10 border border-cyan-800/30 rounded-lg">
         <h3 className="text-cyan-400 font-semibold mb-2">Example Usage</h3>
-        <code className="text-sm text-slate-300 font-mono bg-slate-900/50 px-3 py-2 rounded block">
-          mvn exec:java -Dexec.args="1 9092 /mnt/nvme/node1 localhost:9093,localhost:9094"
+        <code className="text-sm text-slate-300 font-mono bg-slate-900/50 px-3 py-2 rounded block whitespace-pre-wrap">
+          mvn exec:java -Dexec.args="--node-id node1 --port 9092 --data-dir /mnt/nvme/node1 --peers localhost:9093,localhost:9094 --log-segment-bytes 52428800 --raft-compact-threshold 500"
         </code>
       </div>
     </div>

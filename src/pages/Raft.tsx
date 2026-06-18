@@ -1,3 +1,4 @@
+import React from 'react';
 
 export function Raft() {
   return (
@@ -49,6 +50,16 @@ export function Raft() {
         catching up without disrupting the cluster.
       </p>
 
+      <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Quorum-Loss Stepdown (Split-Brain Prevention)</h2>
+      <p className="text-slate-300 mb-4 leading-relaxed">
+        What happens if the current leader is suddenly separated from the rest of the cluster by a network partition, but it doesn't crash? In standard Raft, it might continue acting as the leader indefinitely, endlessly accepting client requests that it can never commit. This leads to "ghost leadership" and stalled clients.
+      </p>
+      <div className="bg-red-900/10 border border-red-800/30 rounded-lg p-5 mb-8">
+        <p className="text-red-200/80 text-sm leading-relaxed">
+          DRMQ proactively guards against this with a strictly timed <strong>Quorum-Loss Stepdown</strong>. The leader runs a background monitor that constantly checks the age of the last successful heartbeat acknowledgment from every peer. If the leader realizes that an entire election window (e.g., 900ms) has passed without communicating with a majority of the cluster, it voluntarily demotes itself back to <code>FOLLOWER</code> and instantly fails any pending client requests to prevent data loss.
+        </p>
+      </div>
+
       <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Log Compaction & Snapshots</h2>
       <p className="text-slate-300 mb-4 leading-relaxed">
         The Raft log grows continuously as messages are appended. To prevent unbounded disk usage,
@@ -63,7 +74,8 @@ export function Raft() {
           compacted from the leader's Raft log, the leader initiates an <code>InstallSnapshotRequest</code> stream. 
           The leader dynamically zips its persistent <code>MessageStore</code> and <code>OffsetManager</code> data 
           into a single archive, transmitting it in 2MB chunks over the network. Upon receiving the final chunk, 
-          the follower safely and atomically hot-swaps its current storage directories with the snapshot contents.
+          the follower safely and atomically hot-swaps its current storage directories with the snapshot contents. 
+          Furthermore, DRMQ intelligently marks peers receiving large snapshots as "in-flight" so the leader does not accidentally lose quorum during heavy disk I/O.
         </p>
       </div>
     </div>
