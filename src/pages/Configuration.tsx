@@ -1,14 +1,14 @@
 export function Configuration() {
   return (
     <div>
-      <h1 className="text-4xl font-bold text-white mb-6">Broker Configuration Reference</h1>
+      <h1 className="text-3xl md:text-4xl font-bold text-white mb-6">Broker Configuration Reference</h1>
       
-      <p className="text-lg text-slate-300 mb-8 leading-relaxed">
+      <p className="text-base md:text-lg text-slate-300 mb-8 leading-relaxed">
         The broker is configured entirely through command-line arguments. There is no configuration
         file; all settings are passed as explicit flags at startup.
       </p>
 
-      <h2 className="text-2xl font-semibold text-slate-100 mb-6 mt-10">Startup Arguments</h2>
+      <h2 className="text-xl md:text-2xl font-semibold text-slate-100 mb-6 mt-10">Startup Arguments</h2>
       <div className="rounded-lg border border-slate-700/50 overflow-hidden my-6 bg-slate-800/40">
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left whitespace-nowrap md:whitespace-normal">

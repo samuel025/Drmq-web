@@ -2,9 +2,9 @@
 export function Faults() {
   return (
     <div>
-      <h1 className="text-4xl font-bold text-white mb-6">Fault Tolerance</h1>
+      <h1 className="text-3xl md:text-4xl font-bold text-white mb-6">Fault Tolerance</h1>
       
-      <p className="text-lg text-slate-300 mb-8 leading-relaxed">
+      <p className="text-base md:text-lg text-slate-300 mb-8 leading-relaxed">
         DRMQ is built to survive failures gracefully. The following scenarios describe how the cluster 
         behaves under duress.
       </p>
@@ -17,13 +17,13 @@ export function Faults() {
           ['Majority Network Partition', 'If 2 out of 3 nodes crash, the remaining node steps down to FOLLOWER. All produce requests will fail (or block, depending on client configuration) because a quorum cannot be reached to commit writes. This guarantees consistency over availability (CP system).', 'border-rose-500/30', 'bg-rose-500/5'],
         ].map(([scenario, result, borderCol, bgCol]) => (
           <div key={scenario} className={`border ${borderCol} ${bgCol} rounded-lg p-6 shadow-sm`}>
-            <h3 className="text-lg font-semibold text-white mb-3">{scenario}</h3>
+            <h3 className="text-base md:text-lg font-semibold text-white mb-3">{scenario}</h3>
             <p className="text-slate-300 leading-relaxed">{result}</p>
           </div>
         ))}
       </div>
       
-      <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Persistence Across Restarts</h2>
+      <h2 className="text-xl md:text-2xl font-semibold text-slate-100 mb-4 mt-10">Persistence Across Restarts</h2>
       <p className="text-slate-300 mb-6 leading-relaxed">
         The following state is written to disk before any RPC response is sent, ensuring correctness
         after a crash:

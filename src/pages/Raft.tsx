@@ -1,15 +1,15 @@
 export function Raft() {
   return (
     <div>
-      <h1 className="text-4xl font-bold text-white mb-6">Raft Consensus</h1>
+      <h1 className="text-3xl md:text-4xl font-bold text-white mb-6">Raft Consensus</h1>
       
-      <p className="text-lg text-slate-300 mb-8 leading-relaxed">
+      <p className="text-base md:text-lg text-slate-300 mb-8 leading-relaxed">
         DRMQ implements the Raft consensus algorithm as described in the original{' '}
         <em>In Search of an Understandable Consensus Algorithm</em> paper (Ongaro &amp; Ousterhout, 2014),
         extended with the Pre-Vote mechanism from the follow-up dissertation.
       </p>
 
-      <h2 className="text-2xl font-semibold text-slate-100 mb-6 mt-10">Node States</h2>
+      <h2 className="text-xl md:text-2xl font-semibold text-slate-100 mb-6 mt-10">Node States</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         <div className="border border-slate-700/50 bg-slate-800/40 rounded-lg p-5">
           <div className="text-xs font-bold tracking-widest text-slate-400 mb-2">FOLLOWER</div>
@@ -31,7 +31,7 @@ export function Raft() {
         </div>
       </div>
 
-      <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Leader Election & Pre-Vote</h2>
+      <h2 className="text-xl md:text-2xl font-semibold text-slate-100 mb-4 mt-10">Leader Election & Pre-Vote</h2>
       <p className="text-slate-300 mb-4 leading-relaxed">
         A standard Raft follower increments its term and requests votes the moment its election
         timer fires. This is safe but can cause unnecessary term inflation when a partitioned node
@@ -48,7 +48,7 @@ export function Raft() {
         catching up without disrupting the cluster.
       </p>
 
-      <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Quorum-Loss Stepdown (Split-Brain Prevention)</h2>
+      <h2 className="text-xl md:text-2xl font-semibold text-slate-100 mb-4 mt-10">Quorum-Loss Stepdown (Split-Brain Prevention)</h2>
       <p className="text-slate-300 mb-4 leading-relaxed">
         What happens if the current leader is suddenly separated from the rest of the cluster by a network partition, but it doesn't crash? In standard Raft, it might continue acting as the leader indefinitely, endlessly accepting client requests that it can never commit. This leads to "ghost leadership" and stalled clients.
       </p>
@@ -58,7 +58,7 @@ export function Raft() {
         </p>
       </div>
 
-      <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Log Compaction & Snapshots</h2>
+      <h2 className="text-xl md:text-2xl font-semibold text-slate-100 mb-4 mt-10">Log Compaction & Snapshots</h2>
       <p className="text-slate-300 mb-4 leading-relaxed">
         The Raft log grows continuously as messages are appended. To prevent unbounded disk usage,
         DRMQ compacts the <code>RaftLog</code> by truncating entries that have already been applied 

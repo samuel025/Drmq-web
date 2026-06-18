@@ -32,7 +32,7 @@ export function Navbar({ onMenuClick }: NavbarProps) {
               <Menu className="w-6 h-6" />
             </button>
 
-            <a className="mr-3 flex-none w-[2.0625rem] overflow-hidden md:w-auto text-xl font-bold text-white tracking-tight cursor-pointer no-invert" href="/">
+            <a className="mr-3 flex-none w-[2.0625rem] overflow-hidden md:w-auto text-xl font-bold text-white tracking-tight cursor-pointer no-invert" href="#/">
               DRMQ<span className="text-cyan-500">.docs</span>
             </a>
 
@@ -40,7 +40,7 @@ export function Navbar({ onMenuClick }: NavbarProps) {
               <nav className="text-sm leading-6 font-semibold text-slate-400">
                 <ul className="flex space-x-8">
                   <li>
-                    <a href="/" className="hover:text-cyan-400 transition-colors cursor-pointer text-cyan-500">Documentation</a>
+                    <a href="#/" className="hover:text-cyan-400 transition-colors cursor-pointer text-cyan-500">Documentation</a>
                   </li>
                   <li>
                     <a href="https://github.com/samuel025/DRMQ" target="_blank" rel="noreferrer" className="flex items-center hover:text-cyan-400 transition-colors cursor-pointer">

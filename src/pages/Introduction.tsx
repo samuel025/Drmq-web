@@ -6,9 +6,9 @@ export function Introduction() {
       <div className="inline-block text-xs font-mono tracking-widest text-cyan-500 border border-cyan-500/30 bg-cyan-500/10 rounded px-3 py-1 mb-4">
         DRMQ v1.0
       </div>
-      <h1 className="text-4xl font-bold text-white mb-6">Introduction</h1>
+      <h1 className="text-3xl md:text-4xl font-bold text-white mb-6">Introduction</h1>
       
-      <p className="text-lg text-slate-300 mb-6 leading-relaxed">
+      <p className="text-base md:text-lg text-slate-300 mb-6 leading-relaxed">
         DRMQ (Distributed Reliable Message Queue) is a high-performance, fault-tolerant message queue engineered from the ground up to provide uncompromising data durability and strict global ordering. At its core, DRMQ is built on a highly optimized implementation of the Raft consensus algorithm, ensuring that your distributed infrastructure remains resilient even in the face of unpredictable network partitions and catastrophic hardware failures.
       </p>
 
@@ -17,10 +17,10 @@ export function Introduction() {
       </p>
 
       <p className="text-slate-400 mb-8 leading-relaxed">
-        In the DRMQ ecosystem, every message follows a strict sequence, and every consumer observes the identical global state machine. There are no split-brain scenarios, no cumbersome consumer rebalancing delays, and no complex election protocols to tune. It is a system purpose-built for mission-critical financial ledgers, audit trails, state machine replication, and any distributed architecture where data integrity is paramount.
+        In the DRMQ ecosystem, every message follows a strict sequence, and every consumer observes the identical global state machine. There are no split-brain scenarios, no cumbersome consumer rebalancing delays, and no complex election protocols to tune. It is a system purpose-built for ledgers, audit trails, state machine replication, and any distributed architecture where data integrity is paramount.
       </p>
 
-      <h2 className="text-2xl font-semibold text-slate-100 mt-10 mb-6">Core Capabilities</h2>
+      <h2 className="text-xl md:text-2xl font-semibold text-slate-100 mt-10 mb-6">Core Capabilities</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
         <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-5">
           <div className="text-sm font-bold text-cyan-400 mb-2">Strict Global Ordering</div>
@@ -48,7 +48,7 @@ export function Introduction() {
         </div>
       </div>
 
-      <h2 className="text-2xl font-semibold text-slate-100 mt-10 mb-4">Key Guarantee</h2>
+      <h2 className="text-xl md:text-2xl font-semibold text-slate-100 mt-10 mb-4">Key Guarantee</h2>
       <div className="bg-slate-800/50 border border-cyan-900/50 rounded-lg p-5 mb-8">
         <p className="text-slate-300">
           A message is only acknowledged to the producer after a <strong className="text-white">quorum (majority)</strong> of
@@ -57,7 +57,7 @@ export function Introduction() {
         </p>
       </div>
 
-      <h2 className="text-2xl font-semibold text-slate-100 mt-10 mb-4">Quick Start Example</h2>
+      <h2 className="text-xl md:text-2xl font-semibold text-slate-100 mt-10 mb-4">Quick Start Example</h2>
       <p className="text-slate-400 mb-4">
         Connecting a client and sending a message is simple using any of our native SDKs.
       </p>

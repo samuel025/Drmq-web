@@ -1,13 +1,13 @@
 export function Groups() {
   return (
     <div>
-      <h1 className="text-4xl font-bold text-white mb-6">Consumer Coordination & Commits</h1>
+      <h1 className="text-3xl md:text-4xl font-bold text-white mb-6">Consumer Coordination & Commits</h1>
       
-      <p className="text-lg text-slate-300 mb-8 leading-relaxed">
+      <p className="text-base md:text-lg text-slate-300 mb-8 leading-relaxed">
         DRMQ provides extremely flexible message consumption by supporting two completely different paradigms: <strong>Single Mode</strong> and <strong>Group Mode</strong>. Understanding the difference between these modes, and exactly how the concept of "Committing" works, is fundamental to using DRMQ effectively in a production system.
       </p>
 
-      <h2 className="text-2xl font-semibold text-slate-100 mb-6 mt-10">Single Mode vs. Group Mode</h2>
+      <h2 className="text-xl md:text-2xl font-semibold text-slate-100 mb-6 mt-10">Single Mode vs. Group Mode</h2>
       
       <div className="space-y-6 mb-10">
         <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
@@ -28,14 +28,14 @@ export function Groups() {
             In Group Mode, multiple consumers share a single "Group ID". The broker acts as a central coordinator, ensuring that <strong>every message in the topic is delivered to exactly one active consumer in the group</strong>. This allows you to effortlessly scale out your processing power.
           </p>
           <ul className="list-disc pl-5 text-slate-300 space-y-2 mb-4">
-            <li><strong>No Partitions Needed:</strong> Unlike Kafka, which requires physical partitions to scale consumers, DRMQ dynamically load-balances a single linear topic across as many consumers as you want.</li>
+            <li><strong>No Partitions Needed:</strong> DRMQ dynamically load-balances a single linear topic across as many consumers as you want.</li>
             <li><strong>Broker Tracking:</strong> The broker permanently remembers the "Current Offset" for the group, so when a new consumer joins or an old one crashes, consumption resumes exactly where the group left off.</li>
             <li><strong>Leases & Commits:</strong> To achieve load-balancing without partitions, DRMQ uses a sophisticated Lease and Commit system to guarantee reliable delivery even if a consumer suddenly loses power.</li>
           </ul>
         </div>
       </div>
 
-      <h2 className="text-2xl font-semibold text-slate-100 mb-6 mt-10">What is a "Commit"?</h2>
+      <h2 className="text-xl md:text-2xl font-semibold text-slate-100 mb-6 mt-10">What is a "Commit"?</h2>
       <p className="text-slate-300 mb-6 leading-relaxed">
         A <strong>Commit</strong> is simply an acknowledgment sent from the consumer to the broker saying: <em>"I have successfully finished processing this message. You can permanently mark it as done for my group, and you never need to send it to us again."</em>
       </p>
@@ -44,7 +44,7 @@ export function Groups() {
         When a commit is received by the broker, DRMQ generates an internal <code>CommitOffsetCommand</code>. This command is actually appended to the <strong>Raft consensus log</strong> and replicated across the entire cluster of brokers! This means that consumer offsets are just as durable and fault-tolerant as the messages themselves. If the leader broker crashes, the new leader replays the Raft log and instantly knows exactly which messages your group has committed.
       </p>
 
-      <h2 className="text-2xl font-semibold text-slate-100 mb-6 mt-10">How Leases Prevent Data Loss</h2>
+      <h2 className="text-xl md:text-2xl font-semibold text-slate-100 mb-6 mt-10">How Leases Prevent Data Loss</h2>
       <p className="text-slate-300 mb-6 leading-relaxed">
         But what happens between the time the broker sends a message to a consumer, and the time the consumer sends a "Commit" back? What if the consumer crashes right in the middle of processing? This is where <strong>Leases</strong> come in.
       </p>
@@ -74,14 +74,14 @@ export function Groups() {
         ))}
       </div>
 
-      <h2 className="text-2xl font-semibold text-slate-100 mb-6 mt-10">Auto-Commit vs. Manual Commit</h2>
+      <h2 className="text-xl md:text-2xl font-semibold text-slate-100 mb-6 mt-10">Auto-Commit vs. Manual Commit</h2>
       <p className="text-slate-300 mb-6 leading-relaxed">
         DRMQ allows you to choose exactly how and when commits happen, which directly dictates your data delivery semantics:
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
         <div className="bg-slate-800/30 border border-slate-700 rounded-lg p-5">
-          <h4 className="text-lg font-semibold text-white mb-2">Auto-Commit (At-Most-Once)</h4>
+          <h4 className="text-base md:text-lg font-semibold text-white mb-2">Auto-Commit (At-Most-Once)</h4>
           <p className="text-slate-300 text-sm leading-relaxed mb-3">
             When auto-commit is enabled, the client library automatically sends a commit to the broker the moment the messages are received, <strong>before</strong> your code has actually processed them.
           </p>
@@ -91,7 +91,7 @@ export function Groups() {
         </div>
 
         <div className="bg-slate-800/30 border border-slate-700 rounded-lg p-5">
-          <h4 className="text-lg font-semibold text-white mb-2">Manual Commit (At-Least-Once)</h4>
+          <h4 className="text-base md:text-lg font-semibold text-white mb-2">Manual Commit (At-Least-Once)</h4>
           <p className="text-slate-300 text-sm leading-relaxed mb-3">
             When auto-commit is disabled (the default), you must explicitly call <code>consumer.commit()</code> <strong>after</strong> you have successfully processed the data (e.g., saved it to a database).
           </p>

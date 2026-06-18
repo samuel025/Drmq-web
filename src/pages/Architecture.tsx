@@ -2,14 +2,14 @@
 export function Architecture() {
   return (
     <div>
-      <h1 className="text-4xl font-bold text-white mb-6">Architecture</h1>
+      <h1 className="text-3xl md:text-4xl font-bold text-white mb-6">Architecture</h1>
       
-      <p className="text-lg text-slate-300 mb-8 leading-relaxed">
+      <p className="text-base md:text-lg text-slate-300 mb-8 leading-relaxed">
         DRMQ is structured in three independent layers that interact through well-defined internal
         interfaces. Understanding these boundaries is critical for operational and debugging work.
       </p>
 
-      <h2 className="text-2xl font-semibold text-slate-100 mb-6">The Three Layers</h2>
+      <h2 className="text-xl md:text-2xl font-semibold text-slate-100 mb-6">The Three Layers</h2>
       <div className="space-y-4 mb-12">
         <div className="border border-cyan-500/20 bg-cyan-500/5 rounded-lg p-6">
           <div className="text-sm font-bold text-cyan-400 mb-3 uppercase tracking-wider">Protocol Layer</div>
@@ -37,16 +37,12 @@ export function Architecture() {
         <div className="border border-purple-500/20 bg-purple-500/5 rounded-lg p-6">
           <div className="text-sm font-bold text-purple-400 mb-3 uppercase tracking-wider">Storage Layer</div>
           <p className="text-slate-300 leading-relaxed">
-            MessageStore manages the on-disk topic data using a segmented, append-only log. 
-            Each topic is a directory of .log files (100MB each) with corresponding .idx sparse 
-            index files. The RaftLog itself uses a separate binary-encoded file to persist Raft 
-            log entries. Consumer group offsets are also persisted inside the Raft log as 
-            CommitOffsetCommand entries, giving them the same durability guarantee as messages.
+            MessageStore manages the on-disk topic data using a segmented, append-only log. Each topic is a directory of .log files. To ensure blazing-fast message retrieval without the I/O overhead of reading separate index files, the broker dynamically builds and maintains a highly optimized sparse index entirely in memory upon startup. The RaftLog itself uses a separate binary-encoded file to persist Raft log entries. Consumer group offsets are also persisted inside the Raft log as CommitOffsetCommand entries, giving them the same durability guarantee as messages.
           </p>
         </div>
       </div>
 
-      <h2 className="text-2xl font-semibold text-slate-100 mb-6">Request Lifecycle: Producer Write</h2>
+      <h2 className="text-xl md:text-2xl font-semibold text-slate-100 mb-6">Request Lifecycle: Producer Write</h2>
       <div className="space-y-0 mb-8 relative">
         <div className="absolute top-0 bottom-0 left-[15px] w-px bg-slate-800 z-0 hidden sm:block" />
         

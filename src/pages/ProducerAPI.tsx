@@ -3,19 +3,19 @@ import { CodeBlock } from '../components/CodeBlock';
 export function ProducerAPI() {
   return (
     <div>
-      <h1 className="text-4xl font-bold text-white mb-6">Java SDK (Producer)</h1>
+      <h1 className="text-3xl md:text-4xl font-bold text-white mb-6">Java SDK (Producer)</h1>
       
-      <p className="text-lg text-slate-300 mb-8 leading-relaxed">
+      <p className="text-base md:text-lg text-slate-300 mb-8 leading-relaxed">
         Because DRMQ is built in Java, the <strong>Java SDK</strong> is the first-class, native client. The <code>DRMQProducer</code> is a thread-safe client for sending messages to the cluster.
         It uses synchronous sends with an underlying blocking TCP socket, meaning <code>send()</code>
         blocks until the message is either acknowledged by a Raft quorum or an unrecoverable error occurs.
       </p>
 
-      <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Initialisation and Failover</h2>
+      <h2 className="text-xl md:text-2xl font-semibold text-slate-100 mb-4 mt-10">Initialisation and Failover</h2>
       <p className="text-slate-300 mb-4">
         Producers should be initialised with a list of bootstrap servers. The producer connects to a random
         server from the list. If it connects to a Follower, the Follower immediately responds with a
-        <code>NOT_LEADER</code> error containing the current Leader's address.
+        <code> NOT_LEADER</code> error containing the current Leader's address.
         The producer transparently redirects to the Leader. If the Leader crashes, the producer will
         cycle through the bootstrap servers, waiting for a new Leader to be elected.
       </p>
@@ -24,10 +24,10 @@ export function ProducerAPI() {
         code={`import com.drmq.client.DRMQProducer;\n\n// Initialize with a comma-separated list of bootstrap servers\nDRMQProducer producer = new DRMQProducer("10.0.1.10:9092,10.0.1.11:9092,10.0.1.12:9092");\n\n// Connect to the cluster\nproducer.connect();`}
       />
 
-      <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Sending Messages</h2>
+      <h2 className="text-xl md:text-2xl font-semibold text-slate-100 mb-4 mt-10">Sending Messages</h2>
       <p className="text-slate-300 mb-4">
         Messages can be sent as raw byte arrays or as UTF-8 strings. You can optionally attach a key
-        to the message (useful for downstream grouping/partitioning logic, though DRMQ enforces global
+        to the message (though DRMQ enforces global
         ordering regardless of the key).
       </p>
       <CodeBlock 

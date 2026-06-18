@@ -1,15 +1,15 @@
 export function Storage() {
   return (
     <div>
-      <h1 className="text-4xl font-bold text-white mb-6">Storage Engine</h1>
+      <h1 className="text-3xl md:text-4xl font-bold text-white mb-6">Storage Engine</h1>
       
-      <p className="text-lg text-slate-300 mb-8 leading-relaxed">
+      <p className="text-base md:text-lg text-slate-300 mb-8 leading-relaxed">
         Once a message is committed by the Raft consensus layer, it is handed off to the{' '}
         <code>MessageStore</code>. The storage layer uses a segmented, append-only log design 
         optimized for high-throughput sequential writes and efficient sequential reads.
       </p>
 
-      <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Log Segments and Sparse Indexing</h2>
+      <h2 className="text-xl md:text-2xl font-semibold text-slate-100 mb-4 mt-10">Log Segments and Sparse Indexing</h2>
       <p className="text-slate-300 mb-4 leading-relaxed">
         Messages for a topic are stored in a dedicated directory (e.g., <code>./data/store/topics/orders/</code>).
         Instead of writing to a single infinitely growing file, the log is split into segments of
@@ -31,7 +31,7 @@ export function Storage() {
         nearest byte boundary before performing a short linear scan on disk.
       </p>
 
-      <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Compaction Candidate Files</h2>
+      <h2 className="text-xl md:text-2xl font-semibold text-slate-100 mb-4 mt-10">Compaction Candidate Files</h2>
       <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-5 mb-10">
         <p className="text-slate-300 text-sm leading-relaxed">
           Because of the segmented design, older completed segments (e.g., <code>00000000.log</code>) become immutable. 
@@ -40,7 +40,7 @@ export function Storage() {
         </p>
       </div>
 
-      <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Follower Reads (Single Mode Only)</h2>
+      <h2 className="text-xl md:text-2xl font-semibold text-slate-100 mb-4 mt-10">Follower Reads (Single Mode Only)</h2>
       <p className="text-slate-300 mb-4 leading-relaxed">
         While the Raft Leader must handle 100% of the write traffic, DRMQ allows <strong>Single Mode</strong> consumers to completely bypass the leader for read operations. This dramatically increases the overall read-throughput of your cluster.
       </p>

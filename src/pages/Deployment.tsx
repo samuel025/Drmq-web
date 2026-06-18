@@ -3,14 +3,14 @@ import { CodeBlock } from '../components/CodeBlock';
 export function Deployment() {
   return (
     <div>
-      <h1 className="text-4xl font-bold text-white mb-6">Deployment & Quick Start</h1>
+      <h1 className="text-3xl md:text-4xl font-bold text-white mb-6">Deployment & Quick Start</h1>
       
-      <p className="text-lg text-slate-300 mb-8 leading-relaxed">
+      <p className="text-base md:text-lg text-slate-300 mb-8 leading-relaxed">
         This guide covers compiling from source, starting a single-node standalone broker, 
         spinning up a local 3-node Raft cluster, and connecting the telemetry dashboard.
       </p>
 
-      <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Prerequisites</h2>
+      <h2 className="text-xl md:text-2xl font-semibold text-slate-100 mb-4 mt-10">Prerequisites</h2>
       <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg divide-y divide-slate-700/50 mb-8 overflow-hidden">
         {[
           ['Java', '17+', 'The broker and client are written in Java 17.'],
@@ -25,14 +25,14 @@ export function Deployment() {
         ))}
       </div>
 
-      <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Build from Source</h2>
+      <h2 className="text-xl md:text-2xl font-semibold text-slate-100 mb-4 mt-10">Build from Source</h2>
       <p className="text-slate-300 mb-4">Clone the repository and build all Maven modules from the project root:</p>
       <CodeBlock 
         language="bash"
         code={`git clone https://github.com/samuel025/DRMQ.git\ncd DRMQ\n\n# Build all modules (broker + client + protocol)\nmvn clean install -DskipTests`}
       />
 
-      <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Start a Single-Node Broker</h2>
+      <h2 className="text-xl md:text-2xl font-semibold text-slate-100 mb-4 mt-10">Start a Single-Node Broker</h2>
       <p className="text-slate-300 mb-4">
         The fastest way to get running. The broker starts on port 9092 and stores data in <code>./data</code> by default.
       </p>
@@ -41,7 +41,7 @@ export function Deployment() {
         code={`cd drmq-broker\n\n# Default: node-id=1, port=9092, data-dir=./data, no peers (standalone)\nmvn exec:java`}
       />
 
-      <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Start a 3-Node Cluster (Local)</h2>
+      <h2 className="text-xl md:text-2xl font-semibold text-slate-100 mb-4 mt-10">Start a 3-Node Cluster (Local)</h2>
       <p className="text-slate-300 mb-4">
         Open three separate terminals. Each node must know the addresses of its peers.
         The cluster will elect a leader once a quorum (2 of 3) establishes connectivity.
@@ -64,7 +64,7 @@ export function Deployment() {
         </div>
       </div>
 
-      <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Verify the Cluster</h2>
+      <h2 className="text-xl md:text-2xl font-semibold text-slate-100 mb-4 mt-10">Verify the Cluster</h2>
       <p className="text-slate-300 mb-4">
         Watch the logs. Within 2-3 seconds you should see one node win the election and print:
       </p>
@@ -73,7 +73,7 @@ export function Deployment() {
         code={`[raft-timer] INFO  RaftNode - [1] Became LEADER for term 1\n[raft-timer] INFO  RaftNode - [1] Sending heartbeats to 2 peers`}
       />
 
-      <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Start the Telemetry Dashboard</h2>
+      <h2 className="text-xl md:text-2xl font-semibold text-slate-100 mb-4 mt-10">Start the Telemetry Dashboard</h2>
       <CodeBlock 
         language="bash"
         code={`cd drmq-dashboard\nnpm install\n\n# Connect to all three broker nodes\nVITE_USE_WEBSOCKET=true npm run dev`}
