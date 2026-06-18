@@ -42,7 +42,7 @@ export function CodeBlock({ code, language }: CodeBlockProps) {
       <div className="p-4 overflow-x-auto">
         <pre className="!bg-transparent !m-0 !p-0">
           <code 
-            className={`language-${language} text-sm font-mono`} 
+            className={`language-${language} !text-xs md:!text-sm font-mono`} 
             dangerouslySetInnerHTML={{ __html: html }} 
           />
         </pre>
