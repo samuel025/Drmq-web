@@ -3,10 +3,10 @@ import { CodeBlock } from '../components/CodeBlock';
 export function ProducerAPI() {
   return (
     <div>
-      <h1 className="text-4xl font-bold text-white mb-6">Producer API</h1>
+      <h1 className="text-4xl font-bold text-white mb-6">Java SDK (Producer)</h1>
       
       <p className="text-lg text-slate-300 mb-8 leading-relaxed">
-        The <code>DRMQProducer</code> is a thread-safe client for sending messages to the cluster.
+        Because DRMQ is built in Java, the <strong>Java SDK</strong> is the first-class, native client. The <code>DRMQProducer</code> is a thread-safe client for sending messages to the cluster.
         It uses synchronous sends with an underlying blocking TCP socket, meaning <code>send()</code>
         blocks until the message is either acknowledged by a Raft quorum or an unrecoverable error occurs.
       </p>

@@ -14,10 +14,10 @@ const NAVIGATION = [
   {
     title: 'Client SDKs',
     links: [
-      { name: 'Producer API', href: '/producer', icon: Terminal },
-      { name: 'Consumer API', href: '/consumer', icon: Terminal },
-      { name: 'Python Client', href: '/python-client', icon: Terminal },
-      { name: 'TypeScript Client', href: '/typescript-client', icon: Terminal },
+      { name: 'Java SDK (Producer)', href: '/producer', icon: Terminal },
+      { name: 'Java SDK (Consumer)', href: '/consumer', icon: Terminal },
+      { name: 'Python SDK', href: '/python-client', icon: Terminal },
+      { name: 'TypeScript SDK', href: '/typescript-client', icon: Terminal },
     ],
   },
   {

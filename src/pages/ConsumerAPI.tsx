@@ -3,11 +3,11 @@ import { CodeBlock } from '../components/CodeBlock';
 export function ConsumerAPI() {
   return (
     <div>
-      <h1 className="text-4xl font-bold text-white mb-6">Consumer API</h1>
+      <h1 className="text-4xl font-bold text-white mb-6">Java SDK (Consumer)</h1>
       
       <p className="text-lg text-slate-300 mb-8 leading-relaxed">
-        The <code>DRMQConsumer</code> is used to read messages from topics.
-        DRMQ supports two distinct consumption modes: <strong>Group Mode</strong> (default)
+        As the first-class native client, the Java <code>DRMQConsumer</code> provides the most robust implementation for reading messages from topics.
+        It natively supports automatic reconnects, leader redirection, and long-polling. DRMQ supports two distinct consumption modes: <strong>Group Mode</strong> (default)
         and <strong>Single Mode</strong>.
       </p>
 
