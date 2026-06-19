@@ -46,7 +46,7 @@ export function Introduction() {
 
       <h2 className="text-2xl font-semibold text-slate-100 mt-10 mb-4">So, What Makes DRMQ Special?</h2>
       <p className="text-slate-300 mb-8 leading-relaxed">
-        There are many message queues out there, but DRMQ focuses on <strong>Reliability and Simplicity</strong>. Standard message queues often become a single point of failure themselves. DRMQ solves this by using a cluster of 3 servers working together in unison (powered by a consensus algorithm called Raft). If one server catches fire or loses power, the other two servers immediately take over. You will never lose a message, and your messages will always be processed in the exact order they were received.
+        There are many message queues out there, but DRMQ focuses on <strong>Reliability and Simplicity</strong>. Standard message queues often become a single point of failure themselves. DRMQ solves this by using a cluster of multiple servers working together in unison (powered by a consensus algorithm called Raft). If one server catches fire or loses power, the other servers immediately take over. You will never lose a message, and your messages will always be processed in the exact order they were received.
       </p>
 
       <h2 className="text-2xl font-semibold text-slate-100 mt-10 mb-6">Core Capabilities</h2>
