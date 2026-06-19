@@ -17,7 +17,7 @@ export function Introduction() {
         Before diving into message queues, we need to understand the environment they live in. A <strong>Distributed System</strong> is simply a collection of multiple independent computers (servers) that work together over a network to appear to the user as one single, powerful computer.
       </p>
       <p className="text-slate-300 mb-8 leading-relaxed">
-        Think of it like building a house. Instead of hiring one giant builder to do everything (a <em>monolithic</em> system), you hire a plumber, an electrician, and a carpenter (a <em>distributed</em> system). It is much faster and more scalable, but there is a major catch: <strong>they have to coordinate constantly to avoid ruining each other's work</strong>. If the electrician gets sick and stops answering their phone, the plumber might be stuck waiting forever, and the whole project freezes. This fragility in communication is exactly what Message Queues were invented to solve.
+        Think of it like running a business. Instead of having one person do absolutely everything (a <em>monolithic</em> system), you hire a Salesperson, an Accountant, and a Shipping Manager (a <em>distributed</em> system). This is much faster and more scalable, but there is a major catch: <strong>they have to communicate constantly</strong>. If the Salesperson makes a sale, they have to tell the Accountant. If the Accountant's phone is turned off, the Salesperson is stuck waiting on the line and can't help the next customer. This fragility in communication is exactly what Message Queues were invented to solve.
       </p>
 
       <h2 className="text-2xl font-semibold text-slate-100 mt-10 mb-4">What is a Message Queue?</h2>
