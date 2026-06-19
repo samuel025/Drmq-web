@@ -80,17 +80,39 @@ export function Architecture() {
         single-node broker. This is highly beneficial for local development, testing, or use-cases 
         where high availability is not strictly required.
       </p>
-      <div className="space-y-4 mb-12">
+      
+      <div className="space-y-6 mb-12">
         <div className="border border-yellow-500/20 bg-yellow-500/5 rounded-lg p-6">
           <div className="text-sm font-bold text-yellow-400 mb-3 uppercase tracking-wider">Single-Node Architecture</div>
-          <p className="text-slate-300 leading-relaxed">
+          <p className="text-slate-300 leading-relaxed mb-4">
             In Single-Node mode, the <strong>Consensus Layer (RaftNode) is completely bypassed</strong>. 
-            The Netty TCP Server directly interfaces with the <code>MessageStore</code>. When a producer sends a 
-            message, the broker immediately appends it to the Write-Ahead Log on disk and acknowledges the 
-            request. There is no leader election, no peer communication, and no quorum wait times. 
-            This results in significantly lower write latency but sacrifices fault tolerance, as the single broker 
-            becomes a single point of failure.
+            The architecture comprises only the following core components:
           </p>
+          <ul className="list-disc list-inside text-slate-300 space-y-2 mb-6 ml-2">
+            <li><strong>Netty TCP Server:</strong> Handles incoming client connections.</li>
+            <li><strong>Message Store:</strong> Appends messages directly to the Write-Ahead Log on disk.</li>
+            <li><strong>Offset Manager:</strong> Tracks consumer progress locally.</li>
+            <li><strong>Consumer Group Coordinator:</strong> Manages consumer leases and load balancing.</li>
+          </ul>
+          <p className="text-slate-300 leading-relaxed mb-6">
+            When a producer sends a message, the broker immediately appends it to disk and acknowledges the 
+            request. There is no leader election, no peer communication, and no quorum wait times. 
+            This results in significantly lower write latency but sacrifices fault tolerance.
+          </p>
+          
+          <div className="text-sm font-bold text-slate-400 mb-3 uppercase tracking-wider">Setup Snippet</div>
+          <p className="text-slate-300 leading-relaxed mb-3 text-sm">
+            To initialize the broker in Single-Node mode, simply omit the <code>--peers</code> or <code>-Dexec.args</code> peer list. The broker defaults to standalone mode:
+          </p>
+          <div className="bg-[#0D1117] rounded-md p-4 overflow-x-auto border border-slate-700/50">
+            <pre className="text-sm text-slate-300 font-mono">
+              <code>{`# Run the broker without peer arguments
+./mvnw -pl drmq-broker exec:java -Dexec.args="--port 9092 --data-dir ./data-1"
+
+# The logs will explicitly confirm standalone mode:
+# [main] INFO BrokerServer - Single-node mode (no Raft)`}</code>
+            </pre>
+          </div>
         </div>
       </div>
     </div>
