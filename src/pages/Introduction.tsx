@@ -12,9 +12,17 @@ export function Introduction() {
         Welcome to DRMQ (Distributed Reliable Message Queue)! If you are new to distributed systems, don't worry. This guide is designed to be as friendly and straightforward as possible.
       </p>
 
+      <h2 className="text-2xl font-semibold text-slate-100 mt-10 mb-4">What is a Distributed System?</h2>
+      <p className="text-slate-300 mb-4 leading-relaxed">
+        Before diving into message queues, we need to understand the environment they live in. A <strong>Distributed System</strong> is simply a collection of multiple independent computers (servers) that work together over a network to appear to the user as one single, powerful computer.
+      </p>
+      <p className="text-slate-300 mb-8 leading-relaxed">
+        Think of it like building a house. Instead of hiring one giant builder to do everything (a <em>monolithic</em> system), you hire a plumber, an electrician, and a carpenter (a <em>distributed</em> system). It is much faster and more scalable, but there is a major catch: <strong>they have to coordinate constantly to avoid ruining each other's work</strong>. If the electrician gets sick and stops answering their phone, the plumber might be stuck waiting forever, and the whole project freezes. This fragility in communication is exactly what Message Queues were invented to solve.
+      </p>
+
       <h2 className="text-2xl font-semibold text-slate-100 mt-10 mb-4">What is a Message Queue?</h2>
       <p className="text-slate-300 mb-4 leading-relaxed">
-        To understand Message Queues, think about how communication works in the real world. If you need to tell your friend something urgently, you call them on the phone. This is <strong>synchronous</strong> communication. Both of you must be available at the exact same time. If your friend's phone is off, the communication fails completely.
+        To solve this communication problem, we use Message Queues. To understand how they work, think about how communication works in the real world. If you need to tell your friend something urgently, you call them on the phone. This is <strong>synchronous</strong> communication. Both of you must be available at the exact same time. If your friend's phone is off, the communication fails completely.
       </p>
       <p className="text-slate-300 mb-4 leading-relaxed">
         Now, imagine instead you send them a letter through the <strong>Post Office</strong>. You drop the letter in a mailbox (you are the <strong>Producer</strong>) and you walk away. The Post Office (the <strong>Message Queue</strong>) stores that letter safely in its sorting room. Hours or days later, your friend (the <strong>Consumer</strong>) walks to their PO box and picks it up. This is <strong>asynchronous</strong> communication. You and your friend never had to be available at the same time, yet the message was safely delivered.
