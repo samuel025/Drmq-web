@@ -32,7 +32,7 @@ export function Navbar({ onMenuClick }: NavbarProps) {
               <Menu className="w-6 h-6" />
             </button>
 
-            <a className="mr-3 flex-none w-[2.0625rem] overflow-hidden md:w-auto text-xl font-bold text-white tracking-tight cursor-pointer no-invert" href="#/">
+            <a className="mr-3 flex-none text-xl font-bold text-white tracking-tight cursor-pointer" href="#/">
               DRMQ<span className="text-cyan-500">.docs</span>
             </a>
 
