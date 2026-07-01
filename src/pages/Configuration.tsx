@@ -1,14 +1,14 @@
 export function Configuration() {
   return (
     <div>
-      <h1 className="text-3xl md:text-4xl font-bold text-white mb-6">Broker Configuration Reference</h1>
+      <h1 className="text-4xl font-bold text-white mb-6">Broker Configuration Reference</h1>
       
-      <p className="text-base md:text-lg text-slate-300 mb-8 leading-relaxed">
+      <p className="text-lg text-slate-300 mb-8 leading-relaxed">
         The broker is configured entirely through command-line arguments. There is no configuration
         file; all settings are passed as explicit flags at startup.
       </p>
 
-      <h2 className="text-xl md:text-2xl font-semibold text-slate-100 mb-6 mt-10">Startup Arguments</h2>
+      <h2 className="text-2xl font-semibold text-slate-100 mb-6 mt-10">Startup Arguments</h2>
       <div className="rounded-lg border border-slate-700/50 overflow-hidden my-6 bg-slate-800/40">
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left whitespace-nowrap md:whitespace-normal">
@@ -26,6 +26,8 @@ export function Configuration() {
                 ['port', 'Integer', '9092', 'TCP port on which the Netty server listens for both client connections and inbound Raft RPC traffic from peers.'],
                 ['data-dir', 'String', './data', 'Root directory for all persistent state. DRMQ creates subdirectories here for raft/ (log + metadata) and store/ (topic segments + indexes). Point this at an NVMe-backed path in production.'],
                 ['peers', 'String', 'none', 'Comma-separated list of peer addresses in host:port format, e.g. localhost:9093,localhost:9094. Omit the node\'s own address. Empty means standalone (single-node) mode with no replication.'],
+                ['max-deliveries', 'Integer', '5', 'The maximum number of times a single message offset can be attempted by a consumer group before being considered a poison pill and routed to the Dead-Letter Queue.'],
+                ['dlq-topic-prefix', 'String', 'dlq.', 'A string prefix prepended to the original topic name to form the Dead-Letter Queue topic name (e.g. dlq.payments-group.orders).'],
                 ['log-segment-bytes', 'Long', '100MB', 'Maximum size in bytes of a single partition log segment before it is rolled. Default is 104857600 (100MB).'],
                 ['log-retention-ms', 'Long', '7 Days', 'Time in milliseconds to keep inactive log segments before they are deleted. Default is 604800000 (7 days).'],
                 ['raft-compact-threshold', 'Long', '1000', 'Number of applied Raft log entries required to trigger an asynchronous disk compaction of the internal consensus log. Default is 1000 entries.'],

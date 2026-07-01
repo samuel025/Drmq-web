@@ -3,15 +3,15 @@ import { CodeBlock } from '../components/CodeBlock';
 export function ConsumerAPI() {
   return (
     <div>
-      <h1 className="text-3xl md:text-4xl font-bold text-white mb-6">Java SDK (Consumer)</h1>
+      <h1 className="text-4xl font-bold text-white mb-6">Java SDK (Consumer)</h1>
       
-      <p className="text-base md:text-lg text-slate-300 mb-8 leading-relaxed">
+      <p className="text-lg text-slate-300 mb-8 leading-relaxed">
         As the first-class native client, the Java <code>DRMQConsumer</code> provides the most robust implementation for reading messages from topics.
         It natively supports automatic reconnects, leader redirection, and long-polling. DRMQ supports two distinct consumption modes: <strong>Group Mode</strong> (default)
         and <strong>Single Mode</strong>.
       </p>
 
-      <h2 className="text-xl md:text-2xl font-semibold text-slate-100 mb-6">Consumption Modes</h2>
+      <h2 className="text-2xl font-semibold text-slate-100 mb-6">Consumption Modes</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
         <div className="border border-slate-700 bg-slate-800/50 rounded-lg p-5">
           <div className="text-sm font-bold text-blue-400 mb-2 uppercase tracking-wider">Group Mode (Default)</div>
@@ -27,7 +27,7 @@ export function ConsumerAPI() {
         </div>
       </div>
 
-      <h2 className="text-xl md:text-2xl font-semibold text-slate-100 mb-4 mt-10">Basic Usage (Group Mode)</h2>
+      <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Basic Usage (Group Mode)</h2>
       <p className="text-slate-300 mb-4">
         In group mode, the consumer asks the broker where it left off upon subscription. Auto-commit
         is disabled by default, meaning you must manually commit offsets after processing, or explicitly
@@ -38,7 +38,7 @@ export function ConsumerAPI() {
         code={`import com.drmq.client.DRMQConsumer;\nimport com.drmq.client.DRMQConsumer.ConsumedMessage;\n\n// Initialize with bootstrap servers and consumer group ID\nDRMQConsumer consumer = new DRMQConsumer("10.0.1.10:9092,10.0.1.11:9092", "analytics-group");\nconsumer.connect();\n\n// Let the broker manage the offset\nconsumer.subscribe("orders");\n\n// Optional: Enable auto-commit after every poll\nconsumer.setAutoCommit(true);\n\nwhile (true) {\n    // Poll max 100 messages. Wait up to 2000ms if queue is empty (Long Polling)\n    List<ConsumedMessage> messages = consumer.poll(100, 2000);\n\n    for (ConsumedMessage msg : messages) {\n        System.out.printf("Offset: %d, Key: %s, Data: %s%n", \n            msg.offset(), msg.key(), msg.payloadAsString());\n    }\n}`}
       />
 
-      <h2 className="text-xl md:text-2xl font-semibold text-slate-100 mb-4 mt-10">The Fan-Out Pattern (Multiple Groups)</h2>
+      <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">The Fan-Out Pattern (Multiple Groups)</h2>
       <p className="text-slate-300 mb-4">
         If you want to broadcast the exact same messages to different independent downstream systems (e.g., an Email Service and a Database Writer), simply use different group names! The broker maintains separate offset pointers for every distinct group.
       </p>
@@ -47,7 +47,7 @@ export function ConsumerAPI() {
         code={`// Service A will process all messages independently\nDRMQConsumer emailService = new DRMQConsumer("localhost:9092", "email-senders");\nemailService.subscribe("user-signups");\n\n// Service B will ALSO process the exact same messages independently\nDRMQConsumer analyticsService = new DRMQConsumer("localhost:9092", "analytics-indexers");\nanalyticsService.subscribe("user-signups");`}
       />
 
-      <h2 className="text-xl md:text-2xl font-semibold text-slate-100 mb-4 mt-10">Manual Offset Management</h2>
+      <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Manual Offset Management</h2>
       <p className="text-slate-300 mb-4">
         To achieve <strong>at-least-once</strong> processing semantics, you must disable auto-commit, process the
         messages fully, and only then commit the offset. You can also explicitly seek to a specific offset.
@@ -57,7 +57,16 @@ export function ConsumerAPI() {
         code={`consumer.setAutoCommit(false);\n\n// Override the broker's offset and explicitly resume from offset 500\nconsumer.subscribe("orders", 500L);\n\nList<ConsumedMessage> messages = consumer.poll(50, 1000);\nfor (ConsumedMessage msg : messages) {\n    processInDatabase(msg);\n}\n\n// Manually commit the offset to the broker\nif (!messages.isEmpty()) {\n    long lastOffset = messages.get(messages.size() - 1).offset();\n    consumer.commit("orders", lastOffset);\n}`}
       />
 
-      <h2 className="text-xl md:text-2xl font-semibold text-slate-100 mb-4 mt-10">Consumer: Single Mode (No Group)</h2>
+      <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Dead-Letter Queues (DLQ) & Explicit NACK</h2>
+      <p className="text-slate-300 mb-4">
+        When using Group Mode, DRMQ provides built-in failure handling. If your application encounters an unprocessable message (a "poison pill"), you can explicitly reject it using the <code>nack()</code> method. If a message fails too many times, the broker automatically routes it to an isolated DLQ topic (e.g. <code>dlq.group.topic</code>) and advances your consumer group past the bad message.
+      </p>
+      <CodeBlock 
+        language="java"
+        code={`List<ConsumedMessage> messages = consumer.poll(50, 1000);\nfor (ConsumedMessage msg : messages) {\n    try {\n        processOrder(msg);\n        consumer.commit("orders", msg.offset());\n    } catch (ValidationException e) {\n        // Explicitly reject the message\n        boolean routedToDlq = consumer.nack("orders", msg.offset());\n        if (routedToDlq) {\n            System.err.println("Message " + msg.offset() + " was routed to the DLQ.");\n        }\n    }\n}`}
+      />
+
+      <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Consumer: Single Mode (No Group)</h2>
       <p className="text-slate-300 mb-4">
         If you want a consumer to simply read from a topic independently without the broker tracking
         its state (e.g. for replaying historical data), just instantiate the consumer without a group ID. The Java SDK automatically disables <code>groupMode</code> under the hood!
