@@ -124,6 +124,21 @@ export function Groups() {
         </ul>
       </div>
 
+      <div className="bg-amber-900/20 border border-amber-700/50 rounded-lg p-6 mb-10">
+        <h3 className="text-xl font-bold text-amber-500 mb-4">DLQ in Single Mode (Inactive)</h3>
+        <p className="text-slate-300 leading-relaxed mb-4">
+          It is critical to understand that <strong>in Single Mode, the Dead-Letter Queue (DLQ) feature is completely inactive.</strong>
+        </p>
+        <ul className="list-disc pl-5 text-slate-300 space-y-2 mb-4 text-sm">
+          <li><strong>No Broker State:</strong> Single Mode intentionally bypasses the Coordinator. The broker does not grant leases, does not track your offset, and does not run expiration timers.</li>
+          <li><strong>No Failure Counting:</strong> Because there is no coordinated state, the broker has no idea how many times your Single Mode consumer has attempted to read a message.</li>
+          <li><strong>NACK is Ignored:</strong> If you explicitly call <code>nack()</code> in Single Mode, the broker logs a warning and ignores the request. The message is NOT routed to the DLQ.</li>
+        </ul>
+        <p className="text-slate-300 leading-relaxed text-sm">
+          If you encounter a poison pill in Single Mode, you are 100% responsible for your own failure handling. You must manually publish the bad message to a different topic using a Producer, and then explicitly advance your manual offset pointer to skip it.
+        </p>
+      </div>
+
     </div>
   );
 }
