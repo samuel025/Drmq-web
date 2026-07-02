@@ -132,7 +132,7 @@ export function Groups() {
         <ul className="list-disc pl-5 text-slate-300 space-y-2 mb-4 text-sm">
           <li><strong>No Broker State:</strong> Single Mode intentionally bypasses the Coordinator. The broker does not grant leases, does not track your offset, and does not run expiration timers.</li>
           <li><strong>No Failure Counting:</strong> Because there is no coordinated state, the broker has no idea how many times your Single Mode consumer has attempted to read a message.</li>
-          <li><strong>NACK is Ignored:</strong> If you explicitly call <code>nack()</code> in Single Mode, the broker logs a warning and ignores the request. The message is NOT routed to the DLQ.</li>
+          <li><strong>NACK Fail-Fast:</strong> If you explicitly call <code>nack()</code> in Single Mode, the client SDK will immediately throw an exception indicating that NACK is only supported in group mode. The request is never sent to the broker.</li>
         </ul>
         <p className="text-slate-300 leading-relaxed text-sm">
           If you encounter a poison pill in Single Mode, you are 100% responsible for your own failure handling. You must manually publish the bad message to a different topic using a Producer, and then explicitly advance your manual offset pointer to skip it.

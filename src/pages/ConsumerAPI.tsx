@@ -54,7 +54,7 @@ export function ConsumerAPI() {
       </p>
       <CodeBlock 
         language="java"
-        code={`consumer.setAutoCommit(false);\n\n// Override the broker's offset and explicitly resume from offset 500\nconsumer.subscribe("orders", 500L);\n\nList<ConsumedMessage> messages = consumer.poll(50, 1000);\nfor (ConsumedMessage msg : messages) {\n    processInDatabase(msg);\n}\n\n// Manually commit the offset to the broker\nif (!messages.isEmpty()) {\n    long lastOffset = messages.get(messages.size() - 1).offset();\n    consumer.commit("orders", lastOffset);\n}`}
+        code={`consumer.setAutoCommit(false);\n\n// Override the broker's offset and explicitly resume from offset 500\nconsumer.subscribe("orders", 500L);\n\nList<ConsumedMessage> messages = consumer.poll(50, 1000);\nfor (ConsumedMessage msg : messages) {\n    processInDatabase(msg);\n}\n\n// Manually commit the offset to the broker\nif (!messages.isEmpty()) {\n    long lastOffset = messages.get(messages.size() - 1).offset();\n    consumer.commit("orders", lastOffset + 1);\n}`}
       />
 
       <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Dead-Letter Queues (DLQ) & Explicit NACK</h2>
@@ -63,13 +63,13 @@ export function ConsumerAPI() {
       </p>
       <CodeBlock 
         language="java"
-        code={`List<ConsumedMessage> messages = consumer.poll(50, 1000);\nfor (ConsumedMessage msg : messages) {\n    try {\n        processOrder(msg);\n        consumer.commit("orders", msg.offset());\n    } catch (ValidationException e) {\n        // Explicitly reject the message\n        boolean routedToDlq = consumer.nack("orders", msg.offset());\n        if (routedToDlq) {\n            System.err.println("Message " + msg.offset() + " was routed to the DLQ.");\n        }\n    }\n}`}
+        code={`List<ConsumedMessage> messages = consumer.poll(50, 1000);\nfor (ConsumedMessage msg : messages) {\n    try {\n        processOrder(msg);\n        consumer.commit("orders", msg.offset() + 1);\n    } catch (ValidationException e) {\n        // Explicitly reject the message\n        boolean routedToDlq = consumer.nack("orders", msg.offset());\n        if (routedToDlq) {\n            System.err.println("Message " + msg.offset() + " was routed to the DLQ.");\n        }\n    }\n}`}
       />
 
       <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Consumer: Single Mode (No Group)</h2>
       <p className="text-slate-300 mb-4">
         If you want a consumer to simply read from a topic independently without the broker tracking
-        its state (e.g. for replaying historical data), just instantiate the consumer without a group ID. The Java SDK automatically disables <code>groupMode</code> under the hood!
+        its state (e.g. for replaying historical data), just instantiate the consumer without a group ID. Note that in Single Mode, NACK is not supported as there is no group state to track failure counts.
       </p>
       <CodeBlock 
         language="java"

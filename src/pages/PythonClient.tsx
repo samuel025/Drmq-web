@@ -39,7 +39,7 @@ export function PythonClient() {
       </p>
       <CodeBlock 
         language="python"
-        code={`from drmq_client import DRMQConsumer\n\n# Join a consumer group for broker-side load balancing\nconsumer = DRMQConsumer("localhost:9092", group_id="analytics-workers")\n\n# Disable auto-commit for strict at-least-once guarantees\nconsumer.auto_commit = False\nconsumer.connect()\nconsumer.subscribe("events")\n\nwhile True:\n    # Long-poll the broker for new messages (waits up to 5 seconds if queue is empty)\n    messages = consumer.poll(max_messages=50, timeout_ms=5000)\n    \n    for msg in messages:\n        # 1. Process the message\n        process_event(msg.payload.decode('utf-8'))\n        \n    # 2. Only commit after successful processing\n    if messages:\n        last_offset = messages[-1].offset\n        consumer.commit("events", last_offset)\n        print(f"Committed up to offset {last_offset}")`}
+        code={`from drmq_client import DRMQConsumer\n\n# Join a consumer group for broker-side load balancing\nconsumer = DRMQConsumer("localhost:9092", group_id="analytics-workers")\n\n# Disable auto-commit for strict at-least-once guarantees\nconsumer.auto_commit = False\nconsumer.connect()\nconsumer.subscribe("events")\n\nwhile True:\n    # Long-poll the broker for new messages (waits up to 5 seconds if queue is empty)\n    messages = consumer.poll(max_messages=50, timeout_ms=5000)\n    \n    for msg in messages:\n        # 1. Process the message\n        process_event(msg.payload.decode('utf-8'))\n        \n    # 2. Only commit after successful processing\n    if messages:\n        last_offset = messages[-1].offset\n        consumer.commit("events", last_offset + 1)\n        print(f"Committed up to offset {last_offset + 1}")`}
       />
 
       <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Dead-Letter Queues (DLQ) & Explicit NACK</h2>
@@ -48,7 +48,7 @@ export function PythonClient() {
       </p>
       <CodeBlock 
         language="python"
-        code={`messages = consumer.poll(max_messages=10, timeout_ms=1000)\nfor msg in messages:\n    try:\n        process_event(msg.payload.decode('utf-8'))\n        consumer.commit("events", msg.offset)\n    except Exception as e:\n        # Explicitly reject the message\n        routed_to_dlq = consumer.nack("events", msg.offset)\n        if routed_to_dlq:\n            print(f"Message {msg.offset} routed to DLQ")`}
+        code={`messages = consumer.poll(max_messages=10, timeout_ms=1000)\nfor msg in messages:\n    try:\n        process_event(msg.payload.decode('utf-8'))\n        consumer.commit("events", msg.offset + 1)\n    except Exception as e:\n        # Explicitly reject the message\n        routed_to_dlq = consumer.nack("events", msg.offset)\n        if routed_to_dlq:\n            print(f"Message {msg.offset} routed to DLQ")`}
       />
 
       <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Consumer: Single Mode (No Group)</h2>

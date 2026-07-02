@@ -37,7 +37,7 @@ export function TypeScriptClient() {
       </p>
       <CodeBlock 
         language="typescript"
-        code={`import { DRMQConsumer } from 'drmq-ts-client';\n\n// Join a consumer group for broker-side load balancing\nconst consumer = new DRMQConsumer("localhost:9092", "analytics-workers");\n\n// Disable auto-commit to ensure at-least-once delivery\nconsumer.autoCommit = false;\nawait consumer.connect();\nawait consumer.subscribe("analytics");\n\nwhile (true) {\n  // Long-poll the broker for new messages\n  const messages = await consumer.poll(50, 5000);\n  \n  for (const msg of messages) {\n    const data = JSON.parse(Buffer.from(msg.payload).toString('utf-8'));\n    await processEventInDatabase(data);\n  }\n  \n  // Commit the batch only after all processing succeeds\n  if (messages.length > 0) {\n    const lastOffset = messages[messages.length - 1].offset;\n    await consumer.commit("analytics", lastOffset);\n    console.log(\`Successfully committed up to offset \${lastOffset}\`);\n  }\n}`}
+        code={`import { DRMQConsumer } from 'drmq-ts-client';\n\n// Join a consumer group for broker-side load balancing\nconst consumer = new DRMQConsumer("localhost:9092", "analytics-workers");\n\n// Disable auto-commit to ensure at-least-once delivery\nconsumer.autoCommit = false;\nawait consumer.connect();\nawait consumer.subscribe("analytics");\n\nwhile (true) {\n  // Long-poll the broker for new messages\n  const messages = await consumer.poll(50, 5000);\n  \n  for (const msg of messages) {\n    const data = JSON.parse(Buffer.from(msg.payload).toString('utf-8'));\n    await processEventInDatabase(data);\n  }\n  \n  // Commit the batch only after all processing succeeds\n  if (messages.length > 0) {\n    const lastOffset = messages[messages.length - 1].offset;\n    await consumer.commit("analytics", lastOffset + 1);\n    console.log(\`Successfully committed up to offset \${lastOffset + 1}\`);\n  }\n}`}
       />
 
       <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Dead-Letter Queues (DLQ) & Explicit NACK</h2>
@@ -46,7 +46,7 @@ export function TypeScriptClient() {
       </p>
       <CodeBlock 
         language="typescript"
-        code={`const messages = await consumer.poll(10, 1000);\nfor (const msg of messages) {\n  try {\n    const data = JSON.parse(Buffer.from(msg.payload).toString('utf-8'));\n    await processEventInDatabase(data);\n    await consumer.commit("analytics", msg.offset);\n  } catch (err) {\n    // Explicitly reject the message\n    const routedToDlq = await consumer.nack("analytics", msg.offset);\n    if (routedToDlq) {\n      console.warn(\`Message \${msg.offset} routed to DLQ\`);\n    }\n  }\n}`}
+        code={`const messages = await consumer.poll(10, 1000);\nfor (const msg of messages) {\n  try {\n    const data = JSON.parse(Buffer.from(msg.payload).toString('utf-8'));\n    await processEventInDatabase(data);\n    await consumer.commit("analytics", msg.offset + 1);\n  } catch (err) {\n    // Explicitly reject the message\n    const routedToDlq = await consumer.nack("analytics", msg.offset);\n    if (routedToDlq) {\n      console.warn(\`Message \${msg.offset} routed to DLQ\`);\n    }\n  }\n}`}
       />
 
       <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Consumer: Single Mode (No Group)</h2>
