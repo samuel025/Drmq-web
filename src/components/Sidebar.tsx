@@ -6,6 +6,8 @@ export const NAVIGATION = [
     title: 'Getting Started',
     links: [
       { name: 'Introduction', href: '/', icon: Book },
+      { name: 'Quickstart', href: '/quickstart', icon: Terminal },
+      { name: 'Installation', href: '/installation', icon: Settings },
       { name: 'Architecture', href: '/architecture', icon: Layers },
       { name: 'Deployment', href: '/deployment', icon: Network },
       { name: 'Configuration', href: '/configuration', icon: Settings },
@@ -26,7 +28,15 @@ export const NAVIGATION = [
       { name: 'Raft Consensus', href: '/raft', icon: Cpu },
       { name: 'Storage Engine', href: '/storage', icon: HardDrive },
       { name: 'Consumer Groups', href: '/groups', icon: Layers },
+      { name: 'Delivery Guarantees', href: '/delivery-guarantees', icon: ShieldAlert },
       { name: 'Fault Tolerance', href: '/faults', icon: ShieldAlert },
+    ],
+  },
+  {
+    title: 'Features',
+    links: [
+      { name: 'Monitoring', href: '/monitoring', icon: Settings },
+      { name: 'Interactive CLI', href: '/cli', icon: Terminal },
     ],
   },
 ];

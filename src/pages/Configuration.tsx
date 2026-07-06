@@ -22,15 +22,19 @@ export function Configuration() {
             </thead>
             <tbody className="divide-y divide-slate-700/50">
               {[
-                ['node-id', 'String', 'Required', 'Unique identifier for this broker within the Raft cluster. Must be stable across restarts — changing it will cause the node to be treated as a new, unknown peer.'],
-                ['port', 'Integer', '9092', 'TCP port on which the Netty server listens for both client connections and inbound Raft RPC traffic from peers.'],
-                ['data-dir', 'String', './data', 'Root directory for all persistent state. DRMQ creates subdirectories here for raft/ (log + metadata) and store/ (topic segments + indexes). Point this at an NVMe-backed path in production.'],
-                ['peers', 'String', 'none', 'Comma-separated list of peer addresses in host:port format, e.g. localhost:9093,localhost:9094. Omit the node\'s own address. Empty means standalone (single-node) mode with no replication.'],
-                ['max-deliveries', 'Integer', '5', 'The maximum number of times a single message offset can be attempted by a consumer group before being considered a poison pill and routed to the Dead-Letter Queue.'],
-                ['dlq-topic-prefix', 'String', 'dlq.', 'A string prefix prepended to the original topic name to form the Dead-Letter Queue topic name (e.g. dlq.payments-group.orders).'],
-                ['log-segment-bytes', 'Long', '100MB', 'Maximum size in bytes of a single partition log segment before it is rolled. Default is 104857600 (100MB).'],
-                ['log-retention-ms', 'Long', '7 Days', 'Time in milliseconds to keep inactive log segments before they are deleted. Default is 604800000 (7 days).'],
-                ['raft-compact-threshold', 'Long', '1000', 'Number of applied Raft log entries required to trigger an asynchronous disk compaction of the internal consensus log. Default is 1000 entries.'],
+                ['node-id / id', 'String', 'standalone', 'Unique identifier for this broker within the Raft cluster. Use --id as an alias. Must be stable across restarts.'],
+                ['port', 'Integer', '9092', 'TCP port on which the Netty server listens for both client connections and inbound Raft RPC traffic.'],
+                ['data-dir', 'String', './data', 'Root directory for all persistent state. Each node must have its own dedicated directory.'],
+                ['peers', 'String', 'none', 'Comma-separated list of peer addresses (e.g. 2:host:9093,3:host:9094). Omit for single-node mode.'],
+                ['max-deliveries', 'Integer', '5', 'Max attempts before routing to the Dead-Letter Queue.'],
+                ['dlq-topic-prefix', 'String', 'dlq.', 'String prefix for DLQ topics (e.g. dlq.payments-group.orders).'],
+                ['log-segment-bytes', 'Long', '100MB', 'Max size (bytes) of a log segment before rolling (default: 104857600).'],
+                ['log-retention-ms', 'Long', '7 Days', 'Time (ms) to keep inactive log segments before deletion (default: 604800000).'],
+                ['raft-compact-threshold', 'Long', '1000', 'Number of committed Raft log entries that triggers an asynchronous snapshot.'],
+                ['metrics-enabled', 'Boolean', 'true', 'Set to false to disable the Prometheus metrics HTTP endpoint.'],
+                ['metrics-disabled', 'Flag', 'none', 'A standalone flag (no value required) equivalent to --metrics-enabled false.'],
+                ['metrics-port', 'Integer', '9096', 'The TCP port on which the broker exposes Prometheus metrics over HTTP.'],
+                ['metrics-path', 'String', '/metrics', 'The HTTP path at which Prometheus metrics are served.']
               ].map(([arg, type, def, desc]) => (
                 <tr key={arg} className="hover:bg-slate-700/20 transition-colors">
                   <td className="px-6 py-4 font-mono text-cyan-400 font-semibold align-top">{arg}</td>
