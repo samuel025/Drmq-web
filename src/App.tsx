@@ -13,10 +13,13 @@ import { TypeScriptClient } from './pages/TypeScriptClient';
 import { Raft } from './pages/Raft';
 import { Storage } from './pages/Storage';
 import { Groups } from './pages/Groups';
+import { TopicsAndOffsets } from './pages/TopicsAndOffsets';
+import { ClusterMode } from './pages/ClusterMode';
 import { DeliveryGuarantees } from './pages/DeliveryGuarantees';
 import { Faults } from './pages/Faults';
 import { Monitoring } from './pages/Monitoring';
 import { CLI } from './pages/CLI';
+import { DLQ } from './pages/DLQ';
 
 function App() {
   return (
@@ -36,10 +39,13 @@ function App() {
           <Route path="raft" element={<Raft />} />
           <Route path="storage" element={<Storage />} />
           <Route path="groups" element={<Groups />} />
+          <Route path="topics-and-offsets" element={<TopicsAndOffsets />} />
+          <Route path="cluster-mode" element={<ClusterMode />} />
           <Route path="delivery-guarantees" element={<DeliveryGuarantees />} />
           <Route path="faults" element={<Faults />} />
           <Route path="monitoring" element={<Monitoring />} />
           <Route path="cli" element={<CLI />} />
+          <Route path="dlq" element={<DLQ />} />
           <Route path="*" element={<Introduction />} />
         </Route>
       </Routes>

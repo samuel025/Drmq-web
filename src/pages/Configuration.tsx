@@ -34,7 +34,8 @@ export function Configuration() {
                 ['metrics-enabled', 'Boolean', 'true', 'Set to false to disable the Prometheus metrics HTTP endpoint.'],
                 ['metrics-disabled', 'Flag', 'none', 'A standalone flag (no value required) equivalent to --metrics-enabled false.'],
                 ['metrics-port', 'Integer', '9096', 'The TCP port on which the broker exposes Prometheus metrics over HTTP.'],
-                ['metrics-path', 'String', '/metrics', 'The HTTP path at which Prometheus metrics are served.']
+                ['metrics-path', 'String', '/metrics', 'The HTTP path at which Prometheus metrics are served.'],
+                ['log-segment-fsync', 'Boolean', 'true', 'Whether to force sync log entries to disk before returning success. Disabling improves throughput but risks data loss on power failure.']
               ].map(([arg, type, def, desc]) => (
                 <tr key={arg} className="hover:bg-slate-700/20 transition-colors">
                   <td className="px-6 py-4 font-mono text-cyan-400 font-semibold align-top">{arg}</td>

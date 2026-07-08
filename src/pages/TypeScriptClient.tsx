@@ -3,69 +3,232 @@ import { CodeBlock } from '../components/CodeBlock';
 export function TypeScriptClient() {
   return (
     <div>
+      <div className="inline-block text-xs font-mono tracking-widest text-cyan-500 border border-cyan-500/30 bg-cyan-500/10 rounded px-3 py-1 mb-4">TYPESCRIPT SDK</div>
       <h1 className="text-4xl font-bold text-white mb-6">TypeScript SDK</h1>
-      
-      <p className="text-lg text-slate-300 mb-8 leading-relaxed">
-        A native Node.js/TypeScript SDK is also available in the 
-        <code>drmq-ts-client</code> directory. It uses 
-        the <code>net</code> module to interact natively 
-        with the broker without requiring heavy HTTP libraries, and features exactly the 
-        same automatic leader redirection and failover capabilities as the Java client.
+      <p className="text-slate-300 mb-6">
+        The DRMQ TypeScript client provides a fully async, promise-based API for producing and consuming messages against a DRMQ broker cluster. It lives in the <code>drmq-ts-client/</code> directory and communicates using the same TCP/Protobuf protocol as the Java and Python SDKs. Both <code>DRMQProducer</code> and <code>DRMQConsumer</code> extend a shared <code>DRMQClient</code> base that manages connection lifecycle, bootstrap-server rotation, and transparent leader redirection via typed <code>ErrorCode</code>s.
       </p>
 
-      <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Installation</h2>
-      <p className="text-slate-300 mb-4 leading-relaxed">
-        The TypeScript SDK requires Node.js 18+. You can install it directly from the local repository:
-      </p>
-      <CodeBlock 
-        language="bash"
-        code={`cd drmq-ts-client\nnpm install\nnpm run build`}
-      />
+      <div className="border-l-4 border-cyan-500 bg-cyan-500/10 rounded-r-lg p-4 mt-4 mb-8">
+        <p className="text-sm text-cyan-200/80"><strong>Client-Side Batching:</strong> Similar to the Java client, the <code>send()</code> method places messages into an internal accumulator queue. A dedicated background loop groups these messages into a single <code>ProduceBatchRequest</code>, waiting up to <strong>5ms (linger.ms)</strong> or until the batch reaches <strong>16KB</strong> before flushing to the network. This ensures extremely high throughput under load.</p>
+      </div>
 
-      <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Producer: Sending Messages</h2>
-      <p className="text-slate-300 mb-4 leading-relaxed">
-        The Producer connects to a random bootstrap server. If it hits a follower, it is automatically redirected to the Raft Leader. Payload data is handled exclusively as Node.js <code>Buffer</code> objects.
-      </p>
-      <CodeBlock 
-        language="typescript"
-        code={`import { DRMQProducer } from 'drmq-ts-client';\n\nconst producer = new DRMQProducer("localhost:9092,localhost:9093");\nawait producer.connect();\n\n// 1. Send a string payload (must be converted to Buffer)\nconst payload1 = Buffer.from("Hello from TypeScript!");\nconst res1 = await producer.send("ts-topic", payload1);\nif (res1.success) {\n  console.log(\`Sent string at offset \${res1.offset}\`);\n}\n\n// 2. Send JSON payload with an optional routing key\nconst payload2 = Buffer.from(JSON.stringify({ user: "bob", action: "click" }));\nconst res2 = await producer.send("analytics", payload2, "bob");`}
-      />
+      <h2 className="text-2xl font-semibold text-slate-100 mt-10 mb-4">Prerequisites</h2>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        {[
+          ['Node.js', 'Any current LTS release. The client uses the built-in net module — no native add-ons required.'],
+          ['TypeScript', 'Install TypeScript as a dev dependency. The source is fully typed and ships a tsconfig.json.'],
+          ['protobufjs', 'The Protobuf runtime used to encode and decode broker messages. Install with npm install protobufjs.'],
+        ].map(([t, d]) => (
+          <div key={t} className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-5">
+            <div className="text-sm font-bold text-cyan-400 mb-2">{t}</div>
+            <p className="text-sm text-slate-400">{d}</p>
+          </div>
+        ))}
+      </div>
 
-      <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Consumer: Group Mode (At-Least-Once)</h2>
-      <p className="text-slate-300 mb-4 leading-relaxed">
-        To prevent message loss in production, use Group Mode with Manual Commits. This requires you to explicitly call <code>commit()</code> only after your asynchronous logic (like database inserts) completes successfully.
-      </p>
-      <CodeBlock 
-        language="typescript"
-        code={`import { DRMQConsumer } from 'drmq-ts-client';\n\n// Join a consumer group for broker-side load balancing\nconst consumer = new DRMQConsumer("localhost:9092", "analytics-workers");\n\n// Disable auto-commit to ensure at-least-once delivery\nconsumer.autoCommit = false;\nawait consumer.connect();\nawait consumer.subscribe("analytics");\n\nwhile (true) {\n  // Long-poll the broker for new messages\n  const messages = await consumer.poll(50, 5000);\n  \n  for (const msg of messages) {\n    const data = JSON.parse(Buffer.from(msg.payload).toString('utf-8'));\n    await processEventInDatabase(data);\n  }\n  \n  // Commit the batch only after all processing succeeds\n  if (messages.length > 0) {\n    const lastOffset = messages[messages.length - 1].offset;\n    await consumer.commit("analytics", lastOffset + 1);\n    console.log(\`Successfully committed up to offset \${lastOffset + 1}\`);\n  }\n}`}
-      />
+      <h2 className="text-2xl font-semibold text-slate-100 mt-10 mb-4">Setup</h2>
+      <CodeBlock language="bash" code={`cd drmq-ts-client
+npm install protobufjs
+npm install --save-dev typescript @types/node
+npx tsc`} />
+      <CodeBlock language="typescript" code={`import { DRMQProducer, DRMQConsumer } from './client';`} />
 
-      <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Dead-Letter Queues (DLQ) & Explicit NACK</h2>
-      <p className="text-slate-300 mb-4 leading-relaxed">
-        When using Group Mode, DRMQ provides built-in failure handling. If your TypeScript application encounters an unprocessable message, you can explicitly reject it using the <code>nack()</code> method. The broker will route the message to a DLQ topic after it exceeds the maximum retry count.
-      </p>
-      <CodeBlock 
-        language="typescript"
-        code={`const messages = await consumer.poll(10, 1000);\nfor (const msg of messages) {\n  try {\n    const data = JSON.parse(Buffer.from(msg.payload).toString('utf-8'));\n    await processEventInDatabase(data);\n    await consumer.commit("analytics", msg.offset + 1);\n  } catch (err) {\n    // Explicitly reject the message\n    const routedToDlq = await consumer.nack("analytics", msg.offset);\n    if (routedToDlq) {\n      console.warn(\`Message \${msg.offset} routed to DLQ\`);\n    }\n  }\n}`}
-      />
+      <hr className="border-slate-700/50 my-10" />
+      <h2 className="text-2xl font-semibold text-slate-100 mb-4">DRMQProducer</h2>
+      <p className="text-slate-300 mb-6">Opens a persistent TCP connection and sends <code>Uint8Array</code> payloads to named topics. Every call to <code>send()</code> is fully async. When the broker returns a <code>NOT_LEADER</code> redirect, the client reconnects to the reported leader automatically.</p>
 
-      <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Consumer: Single Mode (No Group)</h2>
-      <p className="text-slate-300 mb-4 leading-relaxed">
-        If you want to manually stream the log from a specific offset without interfering with production consumer groups, instantiate the client without a group ID. The SDK will automatically disable <code>groupMode</code> under the hood.
-      </p>
-      <CodeBlock 
-        language="typescript"
-        code={`// Instantiate without a group string (automatically disables groupMode)\nconst consumer = new DRMQConsumer("localhost:9092");\nawait consumer.connect();\n\n// Explicitly seek to offset 100\nawait consumer.subscribe("analytics", 100);\n\nconst messages = await consumer.poll(10);\nfor (const msg of messages) {\n  console.log(\`Replaying offset \${msg.offset}\`);\n}`}
-      />
+      <h3 className="text-xl font-semibold text-slate-200 mt-6 mb-3">Constructor</h3>
+      <CodeBlock language="typescript" code={`new DRMQProducer(bootstrapServers: string)
 
-      <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">The Fan-Out Pattern (Multiple Groups)</h2>
-      <p className="text-slate-300 mb-4 leading-relaxed">
-        If you want to broadcast the exact same messages to different independent downstream systems, simply use different group names. The broker maintains separate offset pointers for every distinct group.
-      </p>
-      <CodeBlock 
-        language="typescript"
-        code={`// Service A will process all messages independently\nconst emailService = new DRMQConsumer("localhost:9092", "email-senders");\nawait emailService.subscribe("user-signups");\n\n// Service B will ALSO process the exact same messages independently\nconst analyticsService = new DRMQConsumer("localhost:9092", "analytics-indexers");\nawait analyticsService.subscribe("user-signups");`}
-      />
+// Single broker — development
+const producer = new DRMQProducer("localhost:9092");
+
+// Cluster — production
+const producer = new DRMQProducer("broker1:9092,broker2:9093,broker3:9094");`} />
+
+      <h3 className="text-xl font-semibold text-slate-200 mt-6 mb-3">Methods</h3>
+      <div className="space-y-3 mb-6">
+        {[
+          ['await connect()', 'Promise<void>', 'Opens the TCP connection. Throws DRMQConnectionError if no broker is reachable.'],
+          ['await send(topic, payload, key?)', 'Promise<ProduceResponse>', 'Send payload (Uint8Array) to topic. Optionally attach a routing key. Check .success before using .offset.'],
+          ['close()', 'void', 'Destroys the underlying TCP socket and clears any pending callbacks.'],
+        ].map(([m, r, d]) => (
+          <div key={m} className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-4">
+            <div className="flex flex-wrap gap-2 mb-1 items-baseline">
+              <code className="text-cyan-400 font-semibold">{m}</code>
+              <span className="text-xs text-slate-500">→ {r}</span>
+            </div>
+            <p className="text-sm text-slate-400">{d}</p>
+          </div>
+        ))}
+      </div>
+
+      <h3 className="text-xl font-semibold text-slate-200 mt-6 mb-3">ProduceResponse fields</h3>
+      <div className="space-y-2 mb-6">
+        {[
+          ['success', 'boolean', 'true when the broker accepted and durably persisted the message.'],
+          ['offset', 'number', 'Broker-assigned log offset. Only meaningful when success is true.'],
+          ['errorMessage', 'string', 'A human-readable description of the error when success is false.'],
+        ].map(([f, t, d]) => (
+          <div key={f} className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-3">
+            <div className="flex flex-wrap gap-2 mb-1 items-baseline">
+              <code className="text-emerald-400 font-semibold">{f}</code>
+              <span className="text-xs text-slate-500">→ {t}</span>
+            </div>
+            <p className="text-sm text-slate-400">{d}</p>
+          </div>
+        ))}
+      </div>
+
+      <h3 className="text-xl font-semibold text-slate-200 mt-6 mb-3">Producer example</h3>
+      <CodeBlock language="typescript" code={`import { DRMQProducer } from './client';
+
+async function main() {
+  const producer = new DRMQProducer("localhost:9092,localhost:9093");
+  await producer.connect();
+
+  try {
+    const payload = Buffer.from("Hello from TypeScript!");
+    const res = await producer.send("ts-topic", payload);
+    if (res.success) {
+      console.log(\`Message persisted at offset \${res.offset}\`);
+    } else {
+      console.error(\`Send failed: \${res.errorMessage}\`);
+    }
+
+    // Send with an optional routing key
+    const orderData = Buffer.from(JSON.stringify({ id: 42, amount: 99.99 }));
+    const keyedRes = await producer.send("orders", orderData, "order-42");
+    console.log(\`Keyed send at offset \${keyedRes.offset}\`);
+  } finally {
+    producer.close();
+  }
+}
+
+main().catch(console.error);`} />
+
+      <hr className="border-slate-700/50 my-10" />
+      <h2 className="text-2xl font-semibold text-slate-100 mb-4">DRMQConsumer</h2>
+      <p className="text-slate-300 mb-6">Reads messages from one or more subscribed topics. Supports <strong>Group Mode</strong> (broker coordinates delivery) and <strong>Single Consumer Mode</strong> (manual offset control).</p>
+
+      <h3 className="text-xl font-semibold text-slate-200 mt-6 mb-3">Constructor</h3>
+      <CodeBlock language="typescript" code={`new DRMQConsumer(bootstrapServers: string, groupId?: string, consumerId?: string)
+
+// Group mode — scale out with the same groupId
+const consumer = new DRMQConsumer("localhost:9092,localhost:9093", "ts-workers");
+
+// Single consumer mode — full manual offset control
+const consumer = new DRMQConsumer("localhost:9092");`} />
+      <p className="text-slate-400 text-sm mt-2 mb-6"><code>consumerId</code> defaults to <code>'ts-consumer-1'</code> — set a unique value when running multiple consumers in the same process.</p>
+
+      <h3 className="text-xl font-semibold text-slate-200 mt-6 mb-3">Methods</h3>
+      <div className="space-y-3 mb-6">
+        {[
+          ['await connect()', 'Promise<void>', 'Opens a TCP connection to one of the bootstrap brokers.'],
+          ['autoCommit (property)', 'boolean', 'Set to true to auto-commit after each poll(). Default: false. Assign directly: consumer.autoCommit = true.'],
+          ['await subscribe(topic, fromOffset?)', 'Promise<void>', 'Register interest in topic. In group mode, broker manages offsets. Pass fromOffset to override.'],
+          ['await poll(maxMessages?, timeoutMs?)', 'Promise<StoredMessage[]>', 'Fetch up to maxMessages (default 100). Broker waits up to timeoutMs ms (default 1000).'],
+          ['await commit(topic, nextOffset)', 'Promise<void>', 'Commit nextOffset to the broker for topic.'],
+          ['await nack(topic, offset)', 'Promise<boolean>', 'Reject a message. Returns true if routed to DLQ, false if requeued. Throws Error in single mode.'],
+          ['close()', 'void', 'Destroys the TCP socket and flushes any pending callbacks.'],
+        ].map(([m, r, d]) => (
+          <div key={m} className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-4">
+            <div className="flex flex-wrap gap-2 mb-1 items-baseline">
+              <code className="text-cyan-400 font-semibold">{m}</code>
+              <span className="text-xs text-slate-500">→ {r}</span>
+            </div>
+            <p className="text-sm text-slate-400">{d}</p>
+          </div>
+        ))}
+      </div>
+
+      <h3 className="text-xl font-semibold text-slate-200 mt-6 mb-3">StoredMessage fields</h3>
+      <div className="space-y-2 mb-8">
+        {[
+          ['offset', 'number', 'The broker-assigned log position of the message.'],
+          ['topic', 'string', 'The topic the message was read from.'],
+          ['payload', 'Uint8Array', "Raw message bytes. Convert with Buffer.from(msg.payload).toString('utf-8')."],
+          ['key', 'string | undefined', 'Optional routing key set by the producer.'],
+          ['timestamp', 'number', 'Producer-set timestamp in milliseconds since epoch.'],
+          ['storedAt', 'number', 'Broker-set timestamp (ms since epoch) when the message was durably persisted.'],
+        ].map(([f, t, d]) => (
+          <div key={f} className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-3">
+            <div className="flex flex-wrap gap-2 mb-1 items-baseline">
+              <code className="text-emerald-400 font-semibold">{f}</code>
+              <span className="text-xs text-slate-500">→ {t}</span>
+            </div>
+            <p className="text-sm text-slate-400">{d}</p>
+          </div>
+        ))}
+      </div>
+
+      <h3 className="text-xl font-semibold text-slate-200 mt-6 mb-3">Example 1 — Group mode (auto-commit)</h3>
+      <CodeBlock language="typescript" code={`import { DRMQConsumer } from './client';
+
+async function main() {
+  const consumer = new DRMQConsumer("localhost:9092,localhost:9093", "ts-workers");
+  consumer.autoCommit = true;
+  await consumer.connect();
+  await consumer.subscribe("ts-topic");
+
+  const messages = await consumer.poll(10, 5000);
+  for (const msg of messages) {
+    console.log(\`Received (offset \${msg.offset}): \${Buffer.from(msg.payload).toString('utf-8')}\`);
+  }
+
+  consumer.close();
+}
+
+main().catch(console.error);`} />
+
+      <h3 className="text-xl font-semibold text-slate-200 mt-6 mb-3">Example 2 — Manual commit</h3>
+      <CodeBlock language="typescript" code={`async function main() {
+  const consumer = new DRMQConsumer("localhost:9092,localhost:9093", "order-processors");
+  await consumer.connect();
+  await consumer.subscribe("orders");
+
+  while (true) {
+    const messages = await consumer.poll(50, 2000);
+    for (const msg of messages) {
+      try {
+        await processOrder(msg.payload);
+        await consumer.commit("orders", msg.offset + 1);
+      } catch (err) {
+        console.error(\`Processing failed at offset \${msg.offset}:\`, err);
+        const routedToDlq = await consumer.nack("orders", msg.offset);
+        if (routedToDlq) {
+          console.warn(\`Poison pill moved to DLQ: offset \${msg.offset}\`);
+        }
+      }
+    }
+  }
+}
+
+main().catch(console.error);`} />
+
+      <h3 className="text-xl font-semibold text-slate-200 mt-6 mb-3">Example 3 — Single mode (replay)</h3>
+      <CodeBlock language="typescript" code={`async function main() {
+  const consumer = new DRMQConsumer("localhost:9092"); // no groupId → single mode
+  await consumer.connect();
+
+  // Start from the very beginning of the log
+  await consumer.subscribe("audit-log", 0);
+
+  while (true) {
+    const messages = await consumer.poll(100, 1000);
+    for (const msg of messages) {
+      console.log(
+        \`Replaying offset \${msg.offset}: \${Buffer.from(msg.payload).toString('utf-8')}\`
+      );
+    }
+  }
+}
+
+main().catch(console.error);`} />
+      <div className="border-l-4 border-rose-500 bg-rose-500/10 rounded-r-lg p-4 mt-4">
+        <p className="text-sm text-rose-200/80"><strong>Warning:</strong> <code>nack()</code> throws an <code>Error</code> when called without a <code>groupId</code>. Dead-letter routing is only available in group mode.</p>
+      </div>
     </div>
   );
 }

@@ -14,27 +14,34 @@ export const NAVIGATION = [
     ],
   },
   {
+    title: 'Core Concepts',
+    links: [
+      { name: 'Topics & Offsets', href: '/topics-and-offsets', icon: HardDrive },
+      { name: 'Consumer Groups', href: '/groups', icon: Layers },
+      { name: 'Delivery Guarantees', href: '/delivery-guarantees', icon: ShieldAlert },
+      { name: 'Cluster Mode', href: '/cluster-mode', icon: Cpu },
+    ],
+  },
+  {
     title: 'Client SDKs',
     links: [
-      { name: 'Java SDK (Producer)', href: '/producer', icon: Terminal },
-      { name: 'Java SDK (Consumer)', href: '/consumer', icon: Terminal },
+      { name: 'Java SDK', href: '/producer', icon: Terminal },
       { name: 'Python SDK', href: '/python-client', icon: Terminal },
       { name: 'TypeScript SDK', href: '/typescript-client', icon: Terminal },
     ],
   },
   {
-    title: 'Core Internals',
+    title: 'Broker Setup',
     links: [
       { name: 'Raft Consensus', href: '/raft', icon: Cpu },
       { name: 'Storage Engine', href: '/storage', icon: HardDrive },
-      { name: 'Consumer Groups', href: '/groups', icon: Layers },
-      { name: 'Delivery Guarantees', href: '/delivery-guarantees', icon: ShieldAlert },
       { name: 'Fault Tolerance', href: '/faults', icon: ShieldAlert },
     ],
   },
   {
     title: 'Features',
     links: [
+      { name: 'Dead-Letter Queues', href: '/dlq', icon: ShieldAlert },
       { name: 'Monitoring', href: '/monitoring', icon: Settings },
       { name: 'Interactive CLI', href: '/cli', icon: Terminal },
     ],

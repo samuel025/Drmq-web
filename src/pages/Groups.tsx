@@ -1,144 +1,156 @@
+import { CodeBlock } from '../components/CodeBlock';
+
 export function Groups() {
   return (
     <div>
-      <h1 className="text-4xl font-bold text-white mb-6">Consumer Coordination & Commits</h1>
-      
+      <div className="inline-block text-xs font-mono tracking-widest text-cyan-500 border border-cyan-500/30 bg-cyan-500/10 rounded px-3 py-1 mb-4">CORE CONCEPTS</div>
+      <h1 className="text-4xl font-bold text-white mb-6">Consumer Groups</h1>
       <p className="text-lg text-slate-300 mb-8 leading-relaxed">
-        DRMQ provides extremely flexible message consumption by supporting two completely different paradigms: <strong>Single Mode</strong> and <strong>Group Mode</strong>. Understanding the difference between these modes, and exactly how the concept of "Committing" works, is fundamental to using DRMQ effectively in a production system.
+        DRMQ lets you scale message processing horizontally without partitions. Create any number of consumers that share the same <strong>group name</strong>, and the broker automatically divides the workload among them. At the same time, completely separate groups each receive their own independent copy of every message, enabling fan-out to multiple downstream systems from a single topic.
       </p>
 
-      <h2 className="text-2xl font-semibold text-slate-100 mb-6 mt-10">Single Mode vs. Group Mode</h2>
-      
-      <div className="space-y-6 mb-10">
-        <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
-          <h3 className="text-xl font-bold text-blue-400 mb-3">Single Mode (Manual Control)</h3>
-          <p className="text-slate-300 leading-relaxed mb-4">
-            In Single Mode, the consumer acts entirely independently. The broker <strong>does not</strong> track what this consumer has read, it <strong>does not</strong> coordinate it with other consumers, and it <strong>does not</strong> prevent multiple single-mode consumers from reading the exact same messages.
-          </p>
-          <ul className="list-disc pl-5 text-slate-300 space-y-2 mb-4">
-            <li><strong>Offset Tracking:</strong> You are 100% responsible for keeping track of your own offsets (e.g., saving them in a local file or an external database like PostgreSQL).</li>
-            <li><strong>Replayability:</strong> Because the broker doesn't track state, you can subscribe to any offset at any time. This makes Single Mode perfect for "time-traveling" through the log, re-indexing databases, or debugging.</li>
-            <li><strong>No Commits:</strong> The concept of "committing" does not exist in Single Mode. The broker simply streams messages starting from whatever offset you ask for.</li>
-          </ul>
-        </div>
+      <h2 className="text-2xl font-semibold text-slate-100 mt-10 mb-4">What Is a Consumer Group?</h2>
+      <p className="text-slate-300 mb-4 leading-relaxed">
+        A consumer group is a set of consumer instances that all identify themselves to the broker with the same group name string. The broker tracks a <strong>single committed offset per group per topic</strong> and uses a lease-based dispatch protocol to ensure that each message is delivered to exactly one consumer within the group.
+      </p>
+      <CodeBlock language="text" code={`Topic: orders
+  offset 0: {"id": 1}
+  offset 1: {"id": 2}
+  offset 2: {"id": 3}
+  offset 3: {"id": 4}
 
-        <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
-          <h3 className="text-xl font-bold text-blue-400 mb-3">Group Mode (Broker Coordinated)</h3>
-          <p className="text-slate-300 leading-relaxed mb-4">
-            In Group Mode, multiple consumers share a single "Group ID". The broker acts as a central coordinator, ensuring that <strong>every message in the topic is delivered to exactly one active consumer in the group</strong>. This allows you to effortlessly scale out your processing power.
-          </p>
-          <ul className="list-disc pl-5 text-slate-300 space-y-2 mb-4">
-            <li><strong>No Partitions Needed:</strong> Unlike Kafka, which requires physical partitions to scale consumers, DRMQ dynamically load-balances a single linear topic across as many consumers as you want.</li>
-            <li><strong>Broker Tracking:</strong> The broker permanently remembers the "Current Offset" for the group, so when a new consumer joins or an old one crashes, consumption resumes exactly where the group left off.</li>
-            <li><strong>Leases & Commits:</strong> To achieve load-balancing without partitions, DRMQ uses a sophisticated Lease and Commit system to guarantee reliable delivery even if a consumer suddenly loses power.</li>
-          </ul>
+Group "order-processors" (c1, c2)
+  ├─ c1 receives offsets 0, 2, ...
+  └─ c2 receives offsets 1, 3, ...
+
+Group "analytics" (independent)
+  └─ receives ALL offsets: 0, 1, 2, 3, ...`} />
+
+      <h2 className="text-2xl font-semibold text-slate-100 mt-10 mb-4">How DRMQ Distributes Messages Without Partitions</h2>
+      <p className="text-slate-300 mb-4 leading-relaxed">
+        Traditional brokers rely on partitions to parallelize consumption. DRMQ takes a different approach: the broker maintains a <strong>dispatch queue per group</strong> and leases the next available message to whichever consumer polls first. This means:
+      </p>
+      <ul className="list-disc list-inside text-slate-300 space-y-2 mb-8 ml-2">
+        <li>You can add or remove consumers at any time without reconfiguration.</li>
+        <li>Every consumer in the group stays busy as long as there are unprocessed messages.</li>
+        <li>There is no concept of a "partition owner" or rebalance event.</li>
+      </ul>
+      <div className="border-l-4 border-blue-500 bg-blue-500/10 rounded-r-lg p-4 mb-8">
+        <p className="text-sm text-blue-200/80"><strong>Note:</strong> Because lease-based dispatch ties each in-flight message to a specific consumer instance, uncommitted messages are automatically redelivered if that consumer disconnects before committing. Always design your consumers to be <strong>idempotent</strong>.</p>
+      </div>
+
+      <h2 className="text-2xl font-semibold text-slate-100 mt-10 mb-4">Fan-Out: Independent Groups Each Receive All Messages</h2>
+      <p className="text-slate-300 mb-4 leading-relaxed">
+        Two groups named differently are completely isolated from each other. Both groups maintain their own committed offset, and advancing one has zero effect on the other.
+      </p>
+      <CodeBlock language="text" code={`Topic: orders
+        │
+        ├──► Group "order-processors"  (fulfillment service)
+        │         offset pointer: 42
+        │
+        └──► Group "analytics"         (reporting service)
+                  offset pointer: 38`} />
+
+      <h2 className="text-2xl font-semibold text-slate-100 mt-10 mb-6">Group Mode vs. Single Consumer Mode</h2>
+      <div className="space-y-6 mb-8">
+        <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-6">
+          <h3 className="text-lg font-bold text-cyan-400 mb-3">Group Mode (Default)</h3>
+          <p className="text-slate-300 text-sm leading-relaxed mb-4">Active whenever you construct a <code>DRMQConsumer</code> with a non-empty group name. The broker manages offset dispatch, load balancing, and lease-based redelivery on your behalf.</p>
+          <CodeBlock language="java" code={`// Two consumers sharing the same group
+DRMQConsumer c1 = new DRMQConsumer("localhost:9092,localhost:9093", "order-processors");
+c1.setAutoCommit(true);
+c1.connect();
+c1.subscribe("orders");
+
+DRMQConsumer c2 = new DRMQConsumer("localhost:9092,localhost:9093", "order-processors");
+c2.setAutoCommit(true);
+c2.connect();
+c2.subscribe("orders");
+// The broker ensures c1 and c2 receive different messages`} />
+        </div>
+        <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-6">
+          <h3 className="text-lg font-bold text-cyan-400 mb-3">Single Consumer Mode</h3>
+          <p className="text-slate-300 text-sm leading-relaxed mb-4">Call <code>setGroupMode(false)</code> to disable broker-managed dispatch. Use this for replay, auditing, or reading from an arbitrary position.</p>
+          <CodeBlock language="java" code={`try (DRMQConsumer consumer = new DRMQConsumer("localhost:9092", "my-group")) {
+    consumer.setGroupMode(false); // disable broker coordination
+    consumer.connect();
+    consumer.subscribe("orders", 0); // replay from beginning
+
+    while (true) {
+        List<DRMQConsumer.ConsumedMessage> msgs = consumer.poll(100, 1000);
+        for (var msg : msgs) {
+            System.out.printf("Replaying offset %d: %s%n",
+                msg.offset(), msg.payloadAsString());
+        }
+        if (!msgs.isEmpty()) {
+            long last = msgs.get(msgs.size() - 1).offset();
+            consumer.commit("orders", last + 1);
+        }
+    }
+}`} />
+        </div>
+      </div>
+      <div className="border-l-4 border-rose-500 bg-rose-500/10 rounded-r-lg p-4 mb-8">
+        <p className="text-sm text-rose-200/80"><strong>Warning:</strong> <code>nack()</code> is only supported in group mode. Calling it on a single-mode consumer throws <code>IllegalStateException</code>.</p>
+      </div>
+
+      <h2 className="text-2xl font-semibold text-slate-100 mt-10 mb-4">At-Least-Once Delivery and the Lease Protocol</h2>
+      <p className="text-slate-300 mb-4 leading-relaxed">
+        In group mode, every dispatched message is held under a <strong>lease</strong> tied to the consumer that received it. The lease remains open until that consumer calls <code>commit()</code>. If the consumer's connection drops before the commit reaches the broker, the lease expires and the broker redelivers the message to the next available consumer in the group.
+      </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-5">
+          <div className="text-sm font-bold text-emerald-400 mb-2">Commit advances the group</div>
+          <p className="text-sm text-slate-400">Calling <code>consumer.commit("orders", offset + 1)</code> tells the broker the group has successfully consumed up to <code>offset</code>. No message before that point will be redelivered to this group.</p>
+        </div>
+        <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-5">
+          <div className="text-sm font-bold text-amber-400 mb-2">Crash triggers redelivery</div>
+          <p className="text-sm text-slate-400">If a consumer disconnects with an uncommitted lease, the broker automatically requeues that message for the next <code>poll()</code> call from any live consumer in the group.</p>
         </div>
       </div>
 
-      <h2 className="text-2xl font-semibold text-slate-100 mb-6 mt-10">What is a "Commit"?</h2>
-      <p className="text-slate-300 mb-6 leading-relaxed">
-        A <strong>Commit</strong> is simply an acknowledgment sent from the consumer to the broker saying: <em>"I have successfully finished processing this message. You can permanently mark it as done for my group, and you never need to send it to us again."</em>
-      </p>
-      
-      <p className="text-slate-300 mb-6 leading-relaxed">
-        When a commit is received by the broker, DRMQ generates an internal <code>CommitOffsetCommand</code>. This command is actually appended to the <strong>Raft consensus log</strong> and replicated across the entire cluster of brokers! This means that consumer offsets are just as durable and fault-tolerant as the messages themselves. If the leader broker crashes, the new leader replays the Raft log and instantly knows exactly which messages your group has committed.
-      </p>
-
-      <h2 className="text-2xl font-semibold text-slate-100 mb-6 mt-10">How Leases Prevent Data Loss</h2>
-      <p className="text-slate-300 mb-6 leading-relaxed">
-        But what happens between the time the broker sends a message to a consumer, and the time the consumer sends a "Commit" back? What if the consumer crashes right in the middle of processing? This is where <strong>Leases</strong> come in.
-      </p>
-
-      <div className="space-y-0 mb-10 relative">
-        <div className="absolute top-0 bottom-0 left-[15px] w-px bg-slate-800 z-0 hidden sm:block" />
-        
+      <h2 className="text-2xl font-semibold text-slate-100 mt-10 mb-4">Designing Idempotent Consumers</h2>
+      <p className="text-slate-300 mb-4 leading-relaxed">Because the same message can arrive more than once under at-least-once semantics, your processing logic must be safe to run multiple times with the same input. Common patterns:</p>
+      <div className="space-y-3 mb-8">
         {[
-          { step: '1', title: 'Poll Request', desc: 'A consumer in the group requests a batch of messages.' },
-          { step: '2', title: 'Lease Grant (In-Flight)', desc: 'The broker identifies the next uncommitted messages. Instead of marking them "done", it grants a temporary 30-second lease to that specific consumer. The messages are now "In-Flight".' },
-          { step: '3', title: 'Exclusivity', desc: 'While the lease is active, if another consumer in the same group asks for messages, the broker will skip over the leased messages and hand out the next available ones.' },
-          { step: '4', title: 'The Crossroads (Commit vs. Expire)', desc: 'If the consumer finishes processing and sends a Commit within 30 seconds, the lease is destroyed and the messages are permanently marked completed. However, if the consumer crashes and the 30 seconds expire, the broker instantly revokes the lease and makes those exact messages available to the next polling consumer in the group!' },
-        ].map(({ step, title, desc }) => (
-          <div key={step} className="flex gap-4 relative z-10 mb-4 group">
-            <div className="flex flex-col items-center shrink-0 mt-1">
-              <div className="w-8 h-8 rounded-full bg-slate-900 border-2 border-slate-700 group-hover:border-emerald-500 transition-colors flex items-center justify-center text-xs font-bold text-slate-300 group-hover:text-emerald-400">
-                {step}
-              </div>
-            </div>
-            <div className="flex-1 rounded-lg border border-slate-700/50 bg-slate-800/40 p-5 shadow-sm transition-all hover:shadow-md">
-              <div className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-2 flex items-center">
-                {title}
-              </div>
-              <p className="text-slate-300 leading-relaxed text-sm">{desc}</p>
-            </div>
+          ['Use a unique message key as an idempotency token', 'Producers can attach an optional key to each message. Read it via msg.key(). Store processed keys in a fast lookup (Redis, a database unique index) and skip any message whose key you have already handled.'],
+          ['Use database upsert semantics', "Rather than inserting a new row, use an INSERT ... ON CONFLICT DO NOTHING or equivalent upsert. If the row already exists from a previous delivery, the duplicate write becomes a no-op."],
+          ['Use the offset as a natural idempotency key', 'Every message has a unique, stable offset() value within its topic. Record the highest offset you have successfully persisted per group; if an incoming message\'s offset is ≤ the recorded value, skip it.'],
+        ].map(([title, desc]) => (
+          <div key={title} className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-4">
+            <div className="font-semibold text-slate-200 mb-2">{title}</div>
+            <p className="text-sm text-slate-400 leading-relaxed">{desc}</p>
           </div>
         ))}
       </div>
 
-      <h2 className="text-2xl font-semibold text-slate-100 mb-6 mt-10">Auto-Commit vs. Manual Commit</h2>
-      <p className="text-slate-300 mb-6 leading-relaxed">
-        DRMQ allows you to choose exactly how and when commits happen, which directly dictates your data delivery semantics:
+      <h2 className="text-2xl font-semibold text-slate-100 mt-10 mb-4">Dead-Letter Queues for Unprocessable Messages</h2>
+      <p className="text-slate-300 mb-4 leading-relaxed">
+        If a consumer repeatedly fails to process a message, call <code>consumer.nack(topic, offset)</code> to explicitly reject it. Once a message exceeds the configured threshold (default: <strong>5 attempts</strong>, configurable via <code>--max-deliveries</code>), it is automatically routed to the DLQ topic <code>dlq.&lt;groupName&gt;.&lt;topic&gt;</code> and the group's offset advances past it.
       </p>
+      <CodeBlock language="java" code={`try (DRMQConsumer consumer = new DRMQConsumer("localhost:9092", "order-processors")) {
+    consumer.connect();
+    consumer.subscribe("orders");
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-        <div className="bg-slate-800/30 border border-slate-700 rounded-lg p-5">
-          <h4 className="text-lg font-semibold text-white mb-2">Auto-Commit (At-Most-Once)</h4>
-          <p className="text-slate-300 text-sm leading-relaxed mb-3">
-            When auto-commit is enabled, the client library automatically sends a commit to the broker the moment the messages are received, <strong>before</strong> your code has actually processed them.
-          </p>
-          <p className="text-slate-400 text-sm leading-relaxed italic">
-            Use case: Fast processing where losing a few messages during a crash is acceptable (e.g., live metrics, sensor data).
-          </p>
-        </div>
-
-        <div className="bg-slate-800/30 border border-slate-700 rounded-lg p-5">
-          <h4 className="text-lg font-semibold text-white mb-2">Manual Commit (At-Least-Once)</h4>
-          <p className="text-slate-300 text-sm leading-relaxed mb-3">
-            When auto-commit is disabled (the default), you must explicitly call <code>consumer.commit()</code> <strong>after</strong> you have successfully processed the data (e.g., saved it to a database).
-          </p>
-          <p className="text-slate-400 text-sm leading-relaxed italic">
-            Use case: Mission-critical data where dropping a message is unacceptable (e.g., financial transactions, order processing).
-          </p>
-        </div>
+    while (true) {
+        List<DRMQConsumer.ConsumedMessage> messages = consumer.poll();
+        for (DRMQConsumer.ConsumedMessage msg : messages) {
+            try {
+                processOrder(msg);
+                consumer.commit("orders", msg.offset() + 1);
+            } catch (Exception e) {
+                // Reject the message; broker will redeliver or route to DLQ
+                boolean routedToDlq = consumer.nack("orders", msg.offset());
+                if (routedToDlq) {
+                    System.err.println("Poison pill sent to DLQ: offset " + msg.offset());
+                }
+            }
+        }
+    }
+}`} />
+      <div className="border-l-4 border-blue-500 bg-blue-500/10 rounded-r-lg p-4 mt-4">
+        <p className="text-sm text-blue-200/80"><strong>Note:</strong> The DLQ topic name follows the pattern <code>dlq.&lt;groupName&gt;.&lt;originalTopic&gt;</code>. Subscribe a separate consumer to that topic to inspect, retry, or alert on failed messages.</p>
       </div>
-
-      <h2 className="text-2xl font-semibold text-slate-100 mb-6 mt-10">Dead-Letter Queues (DLQ)</h2>
-      <p className="text-slate-300 mb-6 leading-relaxed">
-        Because DRMQ guarantees at-least-once delivery with manual commits, a "poison pill" message (e.g., malformed JSON that always throws an exception) could cause an infinite loop of crashes and redeliveries, permanently blocking the consumer group. DRMQ solves this elegantly using a built-in <strong>Dead-Letter Queue (DLQ)</strong> mechanism.
-      </p>
-
-      <div className="bg-slate-800/30 border border-slate-700 rounded-lg p-6 mb-10">
-        <h3 className="text-xl font-bold text-rose-400 mb-4">How DLQ Routing Works</h3>
-        <ul className="list-disc pl-5 text-slate-300 space-y-3">
-          <li>
-            <strong className="text-white">Delivery Tracking:</strong> The broker tracks the number of times each specific message offset fails (either via lease expiration or an explicit <code>NACK</code> from the consumer).
-          </li>
-          <li>
-            <strong className="text-white">Threshold Reached:</strong> Once a message reaches the <code>max-deliveries</code> threshold (default: 5), the broker intervenes.
-          </li>
-          <li>
-            <strong className="text-white">Automatic Routing:</strong> The broker automatically reads the poison pill message from the active topic and produces it into a new, isolated DLQ topic (e.g., <code>dlq.payments.orders</code>).
-          </li>
-          <li>
-            <strong className="text-white">Group Advancement:</strong> The broker then artificially commits the bad offset for your group. Your consumers instantly advance to the next healthy message, and the poison pill is safely isolated for manual debugging.
-          </li>
-        </ul>
-      </div>
-
-      <div className="bg-amber-900/20 border border-amber-700/50 rounded-lg p-6 mb-10">
-        <h3 className="text-xl font-bold text-amber-500 mb-4">DLQ in Single Mode (Inactive)</h3>
-        <p className="text-slate-300 leading-relaxed mb-4">
-          It is critical to understand that <strong>in Single Mode, the Dead-Letter Queue (DLQ) feature is completely inactive.</strong>
-        </p>
-        <ul className="list-disc pl-5 text-slate-300 space-y-2 mb-4 text-sm">
-          <li><strong>No Broker State:</strong> Single Mode intentionally bypasses the Coordinator. The broker does not grant leases, does not track your offset, and does not run expiration timers.</li>
-          <li><strong>No Failure Counting:</strong> Because there is no coordinated state, the broker has no idea how many times your Single Mode consumer has attempted to read a message.</li>
-          <li><strong>NACK Fail-Fast:</strong> If you explicitly call <code>nack()</code> in Single Mode, the client SDK will immediately throw an exception indicating that NACK is only supported in group mode. The request is never sent to the broker.</li>
-        </ul>
-        <p className="text-slate-300 leading-relaxed text-sm">
-          If you encounter a poison pill in Single Mode, you are 100% responsible for your own failure handling. You must manually publish the bad message to a different topic using a Producer, and then explicitly advance your manual offset pointer to skip it.
-        </p>
-      </div>
-
     </div>
   );
 }

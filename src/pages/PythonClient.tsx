@@ -3,73 +3,209 @@ import { CodeBlock } from '../components/CodeBlock';
 export function PythonClient() {
   return (
     <div>
-      <h1 className="text-4xl font-bold text-white mb-6">Python SDK</h1>
-      
-      <p className="text-lg text-slate-300 mb-8 leading-relaxed">
-        Because DRMQ relies entirely on raw TCP framing and Google Protocol Buffers, 
-        building clients in other languages is incredibly easy. A native Python SDK is 
-        available in the <code>drmq-python-client</code> directory. 
-        The SDK natively handles automatic leader failovers, transparent retries, and offset auto-committing.
+      <div className="inline-block text-xs font-mono tracking-widest text-cyan-500 border border-cyan-500/30 bg-cyan-500/10 rounded px-3 py-1 mb-4">PYTHON SDK</div>
+      <h1 className="text-4xl font-bold text-white mb-6">Python Client SDK</h1>
+      <p className="text-slate-300 mb-6">
+        The DRMQ Python client lets you send and receive messages using the same TCP/Protobuf protocol as the Java SDK. It lives in the <code>drmq-python-client/</code> directory and requires no external broker-specific package — only the standard <code>protobuf</code> library. Both <code>DRMQProducer</code> and <code>DRMQConsumer</code> inherit from a shared <code>DRMQClient</code> base that manages connection pooling, bootstrap-server rotation, and transparent leader redirection via typed <code>ErrorCode</code>s.
       </p>
 
-      <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Installation</h2>
-      <p className="text-slate-300 mb-4 leading-relaxed">
-        The Python SDK requires Python 3.8+ and the <code>protobuf</code> package. 
-        You can install the SDK locally from the repository root:
-      </p>
-      <CodeBlock 
-        language="bash"
-        code={`cd drmq-python-client\npip install .`}
-      />
+      <div className="border-l-4 border-cyan-500 bg-cyan-500/10 rounded-r-lg p-4 mt-4 mb-8">
+        <p className="text-sm text-cyan-200/80"><strong>Client-Side Batching:</strong> Similar to the Java client, the <code>send()</code> method places messages into an internal accumulator queue. A dedicated background thread groups these messages into a single <code>ProduceBatchRequest</code>, waiting up to <strong>5ms (linger.ms)</strong> or until the batch reaches <strong>16KB</strong> before flushing to the network. This provides massive throughput gains.</p>
+      </div>
 
-      <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Producer: Sending Messages</h2>
-      <p className="text-slate-300 mb-4 leading-relaxed">
-        The Producer connects to a random bootstrap server and automatically redirects to the Raft Leader. 
-        It supports sending raw bytes, strings, and optional keys.
-      </p>
-      <CodeBlock 
-        language="python"
-        code={`from drmq_client import DRMQProducer\n\n# Initialize with a comma-separated list of bootstrap servers\nproducer = DRMQProducer("localhost:9092,localhost:9093")\nproducer.connect()\n\n# 1. Send a simple string (implicitly encoded to bytes)\nres1 = producer.send("python-topic", b"Hello from Python!")\nif res1.success:\n    print(f"Message sent successfully at offset {res1.offset}")\n\n# 2. Send JSON payload with a routing key\nimport json\ndata = json.dumps({"user": "alice", "action": "login"}).encode('utf-8')\nres2 = producer.send("events", payload=data, key="alice")`}
-      />
+      <h2 className="text-2xl font-semibold text-slate-100 mt-10 mb-4">Prerequisites</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-5">
+          <div className="text-sm font-bold text-cyan-400 mb-2">Python 3.x</div>
+          <p className="text-sm text-slate-400">Any recent Python 3 release works. The client uses type hints and f-strings requiring Python 3.6+.</p>
+        </div>
+        <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-5">
+          <div className="text-sm font-bold text-cyan-400 mb-2">protobuf</div>
+          <p className="text-sm text-slate-400">Install the Google Protobuf runtime with <code>pip install protobuf</code>. The generated <code>messages_pb2</code> module is included in the client directory.</p>
+        </div>
+      </div>
 
-      <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Consumer: Group Mode (At-Least-Once)</h2>
-      <p className="text-slate-300 mb-4 leading-relaxed">
-        For production workloads, you should use Group Mode with Manual Commits to guarantee "At-Least-Once" processing.
-        If your script crashes before calling <code>commit()</code>, the broker will redeliver the messages to another consumer after 30 seconds.
-      </p>
-      <CodeBlock 
-        language="python"
-        code={`from drmq_client import DRMQConsumer\n\n# Join a consumer group for broker-side load balancing\nconsumer = DRMQConsumer("localhost:9092", group_id="analytics-workers")\n\n# Disable auto-commit for strict at-least-once guarantees\nconsumer.auto_commit = False\nconsumer.connect()\nconsumer.subscribe("events")\n\nwhile True:\n    # Long-poll the broker for new messages (waits up to 5 seconds if queue is empty)\n    messages = consumer.poll(max_messages=50, timeout_ms=5000)\n    \n    for msg in messages:\n        # 1. Process the message\n        process_event(msg.payload.decode('utf-8'))\n        \n    # 2. Only commit after successful processing\n    if messages:\n        last_offset = messages[-1].offset\n        consumer.commit("events", last_offset + 1)\n        print(f"Committed up to offset {last_offset + 1}")`}
-      />
+      <h2 className="text-2xl font-semibold text-slate-100 mt-10 mb-4">Setup</h2>
+      <CodeBlock language="bash" code={`pip install protobuf
+cd drmq-python-client`} />
+      <CodeBlock language="python" code={`from drmq_client import DRMQProducer, DRMQConsumer`} />
 
-      <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Dead-Letter Queues (DLQ) & Explicit NACK</h2>
-      <p className="text-slate-300 mb-4 leading-relaxed">
-        When using Group Mode, DRMQ provides built-in failure handling. If your Python application encounters an unprocessable message, you can explicitly reject it using the <code>nack()</code> method. The broker will route the message to a DLQ topic after it exceeds the maximum retry count.
-      </p>
-      <CodeBlock 
-        language="python"
-        code={`messages = consumer.poll(max_messages=10, timeout_ms=1000)\nfor msg in messages:\n    try:\n        process_event(msg.payload.decode('utf-8'))\n        consumer.commit("events", msg.offset + 1)\n    except Exception as e:\n        # Explicitly reject the message\n        routed_to_dlq = consumer.nack("events", msg.offset)\n        if routed_to_dlq:\n            print(f"Message {msg.offset} routed to DLQ")`}
-      />
+      <hr className="border-slate-700/50 my-10" />
+      <h2 className="text-2xl font-semibold text-slate-100 mb-4">DRMQProducer</h2>
+      <p className="text-slate-300 mb-6">Connects to a DRMQ broker and sends byte payloads to named topics. When the broker returns a <code>NOT_LEADER</code> error, the client automatically redirects to the reported leader.</p>
 
-      <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Consumer: Single Mode (No Group)</h2>
-      <p className="text-slate-300 mb-4 leading-relaxed">
-        If you want to read messages starting from a specific point without the broker tracking your state, 
-        you can use Single Mode. The SDK automatically sets <code>group_mode = False</code> under the hood if you instantiate it without a <code>group_id</code>.
-      </p>
-      <CodeBlock 
-        language="python"
-        code={`# Instantiate without a group_id (automatically sets group_mode=False)\nconsumer = DRMQConsumer("localhost:9092")\nconsumer.connect()\n\n# Explicitly seek to offset 100\nconsumer.subscribe("events", from_offset=100)\n\nmessages = consumer.poll(max_messages=10)\nfor msg in messages:\n    print(f"Replaying message at {msg.offset}: {msg.payload}")`}
-      />
+      <h3 className="text-xl font-semibold text-slate-200 mt-6 mb-3">Constructor</h3>
+      <CodeBlock language="python" code={`DRMQProducer(bootstrap_servers: str)
 
-      <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">The Fan-Out Pattern (Multiple Groups)</h2>
-      <p className="text-slate-300 mb-4 leading-relaxed">
-        If you want to broadcast the exact same messages to different independent downstream systems, simply use different group names. The broker maintains separate offset pointers for every distinct group.
-      </p>
-      <CodeBlock 
-        language="python"
-        code={`# Service A will process all messages independently\nemail_service = DRMQConsumer("localhost:9092", group_id="email-senders")\nemail_service.subscribe("user-signups")\n\n# Service B will ALSO process the exact same messages independently\nanalytics_service = DRMQConsumer("localhost:9092", group_id="analytics-indexers")\nanalytics_service.subscribe("user-signups")`}
-      />
+# Single broker — development
+producer = DRMQProducer("localhost:9092")
 
+# Cluster — production
+producer = DRMQProducer("broker1:9092,broker2:9093,broker3:9094")`} />
+
+      <h3 className="text-xl font-semibold text-slate-200 mt-6 mb-3">Methods</h3>
+      <div className="space-y-3 mb-6">
+        {[
+          ['connect()', 'None', 'Opens a TCP socket to one of the bootstrap brokers. Raises DRMQConnectionError if no broker is reachable.'],
+          ['send(topic, payload, key=None)', 'concurrent.futures.Future', 'Asynchronously queues payload (bytes) to topic. Returns a Future resolving to a ProduceResponse.'],
+          ['close()', 'None', 'Closes the underlying TCP socket.'],
+        ].map(([m, r, d]) => (
+          <div key={m} className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-4">
+            <div className="flex flex-wrap gap-2 mb-1 items-baseline">
+              <code className="text-cyan-400 font-semibold">{m}</code>
+              <span className="text-xs text-slate-500">→ {r}</span>
+            </div>
+            <p className="text-sm text-slate-400">{d}</p>
+          </div>
+        ))}
+      </div>
+
+      <h3 className="text-xl font-semibold text-slate-200 mt-6 mb-3">ProduceResponse fields</h3>
+      <div className="space-y-2 mb-6">
+        {[
+          ['.success', 'bool', 'True when the broker accepted and persisted the message.'],
+          ['.offset', 'int', 'Broker-assigned log offset. Meaningful only when .success is True.'],
+          ['.error_message', 'str', 'Human-readable error when .success is False.'],
+        ].map(([f, t, d]) => (
+          <div key={f} className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-3">
+            <div className="flex flex-wrap gap-2 mb-1 items-baseline">
+              <code className="text-emerald-400 font-semibold">{f}</code>
+              <span className="text-xs text-slate-500">→ {t}</span>
+            </div>
+            <p className="text-sm text-slate-400">{d}</p>
+          </div>
+        ))}
+      </div>
+
+      <h3 className="text-xl font-semibold text-slate-200 mt-6 mb-3">Producer example</h3>
+      <CodeBlock language="python" code={`from drmq_client import DRMQProducer
+
+producer = DRMQProducer("localhost:9092,localhost:9093")
+try:
+    producer.connect()
+
+    res = producer.send("python-topic", b"Hello from Python!").result()
+    if res.success:
+        print(f"Message persisted at offset {res.offset}")
+    else:
+        print(f"Send failed: {res.error_message}")
+
+    # Send with an optional routing key
+    res2 = producer.send("orders", b'{"id": 42}', key="order-42").result()
+    print(f"Keyed send at offset {res2.offset}")
+finally:
+    producer.close()`} />
+      <div className="border-l-4 border-cyan-500 bg-cyan-500/10 rounded-r-lg p-4 my-4">
+        <p className="text-sm text-cyan-200/80"><strong>Tip:</strong> You do not need to pre-create a topic. DRMQ creates topics implicitly on the first produce call.</p>
+      </div>
+
+      <hr className="border-slate-700/50 my-10" />
+      <h2 className="text-2xl font-semibold text-slate-100 mb-4">DRMQConsumer</h2>
+      <p className="text-slate-300 mb-6">Reads messages from one or more subscribed topics. Supports <strong>group mode</strong> for load-balanced consumption and <strong>single mode</strong> for precise manual offset control.</p>
+
+      <h3 className="text-xl font-semibold text-slate-200 mt-6 mb-3">Constructor</h3>
+      <CodeBlock language="python" code={`DRMQConsumer(bootstrap_servers: str, group_id: Optional[str] = None, consumer_id: str = "py-consumer-1")
+
+# Group mode
+consumer = DRMQConsumer("localhost:9092,localhost:9093", group_id="python-workers")
+
+# Single mode — manual offset control
+consumer = DRMQConsumer("localhost:9092")`} />
+
+      <h3 className="text-xl font-semibold text-slate-200 mt-6 mb-3">Methods</h3>
+      <div className="space-y-3 mb-6">
+        {[
+          ['connect()', 'None', 'Opens a TCP socket to one of the bootstrap brokers.'],
+          ['auto_commit (property)', 'bool', 'Set to True to auto-commit after each poll(). Defaults to False. Assign directly: consumer.auto_commit = True.'],
+          ['subscribe(topic, from_offset=None)', 'None', 'Register interest in topic. In group mode, broker manages the offset. Pass from_offset to override.'],
+          ['poll(max_messages=100, timeout_ms=1000)', 'List[StoredMessage]', 'Fetch up to max_messages. Broker waits up to timeout_ms ms before returning an empty list.'],
+          ['commit(topic, offset)', 'None', 'Commit offset to the broker for topic.'],
+          ['nack(topic, offset)', 'bool', 'Reject a message. Returns True if routed to DLQ, False if requeued. Raises RuntimeError in single mode.'],
+          ['close()', 'None', 'Closes the underlying TCP socket.'],
+        ].map(([m, r, d]) => (
+          <div key={m} className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-4">
+            <div className="flex flex-wrap gap-2 mb-1 items-baseline">
+              <code className="text-cyan-400 font-semibold">{m}</code>
+              <span className="text-xs text-slate-500">→ {r}</span>
+            </div>
+            <p className="text-sm text-slate-400">{d}</p>
+          </div>
+        ))}
+      </div>
+
+      <h3 className="text-xl font-semibold text-slate-200 mt-6 mb-3">StoredMessage fields</h3>
+      <div className="space-y-2 mb-8">
+        {[
+          ['.offset', 'int', 'Broker-assigned log position.'],
+          ['.payload', 'bytes', 'Raw message bytes. Decode with msg.payload.decode("utf-8") for text.'],
+          ['.key', 'str', 'Optional routing key set by the producer.'],
+          ['.timestamp', 'int', 'Producer-set timestamp in milliseconds since epoch.'],
+          ['.topic', 'str', 'The topic the message was read from.'],
+        ].map(([f, t, d]) => (
+          <div key={f} className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-3">
+            <div className="flex flex-wrap gap-2 mb-1 items-baseline">
+              <code className="text-emerald-400 font-semibold">{f}</code>
+              <span className="text-xs text-slate-500">→ {t}</span>
+            </div>
+            <p className="text-sm text-slate-400">{d}</p>
+          </div>
+        ))}
+      </div>
+
+      <h3 className="text-xl font-semibold text-slate-200 mt-6 mb-3">Example 1 — Group mode (auto-commit)</h3>
+      <CodeBlock language="python" code={`from drmq_client import DRMQConsumer
+
+consumer = DRMQConsumer("localhost:9092,localhost:9093", group_id="python-workers")
+consumer.auto_commit = True
+try:
+    consumer.connect()
+    consumer.subscribe("python-topic")
+
+    messages = consumer.poll(max_messages=10, timeout_ms=5000)
+    for msg in messages:
+        print(f"Received (offset {msg.offset}): {msg.payload.decode('utf-8')}")
+finally:
+    consumer.close()`} />
+
+      <h3 className="text-xl font-semibold text-slate-200 mt-6 mb-3">Example 2 — Manual commit</h3>
+      <CodeBlock language="python" code={`from drmq_client import DRMQConsumer
+
+consumer = DRMQConsumer("localhost:9092,localhost:9093", group_id="order-processors")
+try:
+    consumer.connect()
+    consumer.subscribe("orders")
+
+    while True:
+        messages = consumer.poll(max_messages=50, timeout_ms=2000)
+        for msg in messages:
+            try:
+                process_order(msg.payload)
+                consumer.commit("orders", msg.offset + 1)
+            except Exception as e:
+                print(f"Processing failed for offset {msg.offset}: {e}")
+                routed = consumer.nack("orders", msg.offset)
+                if routed:
+                    print(f"Poison pill sent to DLQ: offset {msg.offset}")
+finally:
+    consumer.close()`} />
+
+      <h3 className="text-xl font-semibold text-slate-200 mt-6 mb-3">Example 3 — Single mode (replay)</h3>
+      <CodeBlock language="python" code={`from drmq_client import DRMQConsumer
+
+consumer = DRMQConsumer("localhost:9092")  # no group_id → single mode
+try:
+    consumer.connect()
+    consumer.subscribe("audit-log", from_offset=0)  # replay from start
+
+    while True:
+        messages = consumer.poll(max_messages=100, timeout_ms=1000)
+        for msg in messages:
+            print(f"Replaying offset {msg.offset}: {msg.payload.decode('utf-8')}")
+finally:
+    consumer.close()`} />
+      <div className="border-l-4 border-rose-500 bg-rose-500/10 rounded-r-lg p-4 mt-4">
+        <p className="text-sm text-rose-200/80"><strong>Warning:</strong> <code>nack()</code> raises <code>RuntimeError</code> when called in single-consumer mode. Dead-letter routing is only available when a <code>group_id</code> is set.</p>
+      </div>
     </div>
   );
 }
