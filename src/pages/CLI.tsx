@@ -37,6 +37,7 @@ export function CLI() {
       <h3 className="text-xl font-semibold text-slate-200 mt-6 mb-3">Commands</h3>
       <ul className="list-disc list-inside text-slate-300 space-y-4 mb-8 ml-2">
         <li><strong><code>subscribe &lt;topic&gt; [offset]</code>:</strong> Subscribe to a topic.</li>
+        <li><strong><code>seektime &lt;topic&gt; &lt;timestamp&gt;</code>:</strong> Seek to a specific date/time (accepts Unix ms or ISO-8601).</li>
         <li><strong><code>poll [max] [timeout_ms]</code>:</strong> Fetch one batch of messages from all subscribed topics.</li>
         <li><strong><code>stream [timeout_ms]</code>:</strong> Enter continuous streaming mode.</li>
         <li><strong><code>commit &lt;topic&gt; [offset]</code>:</strong> Commit the current offset.</li>
@@ -47,7 +48,7 @@ export function CLI() {
 
       <CodeBlock 
         language="text"
-        code={`consumer[my-consumer-group]> subscribe orders\nconsumer[my-consumer-group]> stream\n📡 Streaming... (press Ctrl+C to stop) [auto-commit=off]`}
+        code={`consumer[my-consumer-group]> subscribe orders\nconsumer[my-consumer-group]> seektime orders 2026-07-13T10:30:00Z\nconsumer[my-consumer-group]> stream\n📡 Streaming... (press Ctrl+C to stop) [auto-commit=off]`}
       />
     </div>
   );

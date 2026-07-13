@@ -78,21 +78,23 @@ producer = DRMQProducer("broker1:9092,broker2:9093,broker3:9094")`} />
       </div>
 
       <h3 className="text-xl font-semibold text-slate-200 mt-6 mb-3">Producer example</h3>
-      <CodeBlock language="python" code={`from drmq_client import DRMQProducer
+      <CodeBlock language="python" code={`import json
+from drmq_client import DRMQProducer
 
 producer = DRMQProducer("localhost:9092,localhost:9093")
 try:
     producer.connect()
 
-    res = producer.send("python-topic", b"Hello from Python!").result()
+    # Create a DTO-like dictionary and serialize it to JSON bytes
+    order = {"userId": "user-123", "amount": 99.50, "currency": "USD"}
+    payload = json.dumps(order).encode('utf-8')
+
+    res = producer.send("orders", payload, key="user-123").result()
+    
     if res.success:
-        print(f"Message persisted at offset {res.offset}")
+        print(f"Order persisted at offset {res.offset}")
     else:
         print(f"Send failed: {res.error_message}")
-
-    # Send with an optional routing key
-    res2 = producer.send("orders", b'{"id": 42}', key="order-42").result()
-    print(f"Keyed send at offset {res2.offset}")
 finally:
     producer.close()`} />
       <div className="border-l-4 border-cyan-500 bg-cyan-500/10 rounded-r-lg p-4 my-4">
@@ -117,9 +119,10 @@ consumer = DRMQConsumer("localhost:9092")`} />
         {[
           ['connect()', 'None', 'Opens a TCP socket to one of the bootstrap brokers.'],
           ['auto_commit (property)', 'bool', 'Set to True to auto-commit after each poll(). Defaults to False. Assign directly: consumer.auto_commit = True.'],
-          ['subscribe(topic, from_offset=None)', 'None', 'Register interest in topic. In group mode, broker manages the offset. Pass from_offset to override.'],
-          ['poll(max_messages=100, timeout_ms=1000)', 'List[StoredMessage]', 'Fetch up to max_messages. Broker waits up to timeout_ms ms before returning an empty list.'],
-          ['commit(topic, offset)', 'None', 'Commit offset to the broker for topic.'],
+          ['subscribe(topic, from_offset=None)', 'None', 'Register interest in topic. Pass from_offset to override the broker.'],
+          ['seek_by_time(topic, timestamp)', 'None', 'Seek to the first message at or after the given Unix epoch timestamp (ms).'],
+          ['poll(max_messages=100, timeout_ms=1000)', 'list[pb.StoredMessage]', 'Fetch messages across all subscriptions.'],
+          ['commit(topic, next_offset)', 'None', 'Commit next_offset to the broker for topic.'],
           ['nack(topic, offset)', 'bool', 'Reject a message. Returns True if routed to DLQ, False if requeued. Raises RuntimeError in single mode.'],
           ['close()', 'None', 'Closes the underlying TCP socket.'],
         ].map(([m, r, d]) => (
@@ -153,17 +156,20 @@ consumer = DRMQConsumer("localhost:9092")`} />
       </div>
 
       <h3 className="text-xl font-semibold text-slate-200 mt-6 mb-3">Example 1 — Group mode (auto-commit)</h3>
-      <CodeBlock language="python" code={`from drmq_client import DRMQConsumer
+      <CodeBlock language="python" code={`import json
+from drmq_client import DRMQConsumer
 
 consumer = DRMQConsumer("localhost:9092,localhost:9093", group_id="python-workers")
 consumer.auto_commit = True
 try:
     consumer.connect()
-    consumer.subscribe("python-topic")
+    consumer.subscribe("orders")
 
     messages = consumer.poll(max_messages=10, timeout_ms=5000)
     for msg in messages:
-        print(f"Received (offset {msg.offset}): {msg.payload.decode('utf-8')}")
+        # Deserialize JSON bytes back to a dictionary
+        order = json.loads(msg.payload.decode('utf-8'))
+        print(f"Received order from {order['userId']} for {order['amount']} (offset {msg.offset})")
 finally:
     consumer.close()`} />
 
@@ -201,6 +207,27 @@ try:
         messages = consumer.poll(max_messages=100, timeout_ms=1000)
         for msg in messages:
             print(f"Replaying offset {msg.offset}: {msg.payload.decode('utf-8')}")
+finally:
+    consumer.close()`} />
+
+      <h3 className="text-xl font-semibold text-slate-200 mt-6 mb-3">Example 4 — Time-Based Log Replay</h3>
+      <CodeBlock language="python" code={`from drmq_client import DRMQConsumer
+from datetime import datetime, timezone
+
+consumer = DRMQConsumer("localhost:9092") # works in both single and group mode
+try:
+    consumer.connect()
+
+    # Replay from exactly 1 hour ago
+    target_dt = datetime.now(timezone.utc)
+    target_timestamp = int(target_dt.timestamp() * 1000) - (60 * 60 * 1000)
+    
+    # The SDK automatically asks the broker for the exact offset
+    consumer.seek_by_time("user-activity", target_timestamp)
+
+    # Poll will naturally fetch from the new offset
+    messages = consumer.poll(max_messages=100, timeout_ms=1000)
+    print(f"Fetched {len(messages)} messages from the past hour.")
 finally:
     consumer.close()`} />
       <div className="border-l-4 border-rose-500 bg-rose-500/10 rounded-r-lg p-4 mt-4">

@@ -126,6 +126,23 @@ consumer.subscribe("orders", 1_500);   // or a specific position`],
         ))}
       </div>
 
+      <h2 className="text-2xl font-semibold text-slate-100 mt-10 mb-4">Replaying Messages from a Specific Date and Time</h2>
+      <p className="text-slate-300 mb-6 leading-relaxed">
+        If you don't know the exact numeric offset but you know *when* an incident occurred, DRMQ allows you to efficiently rewind your consumer to a specific historical timestamp.
+      </p>
+      <CodeBlock language="java" code={`DRMQConsumer consumer = new DRMQConsumer("localhost:9092", "analytics-group");
+consumer.connect();
+
+// Rewind the group to exactly 12 hours ago
+long targetTime = System.currentTimeMillis() - (12 * 60 * 60 * 1000);
+consumer.seekByTime("orders", targetTime);
+
+// The consumer will naturally resume fetching from the new offset
+List<DRMQConsumer.ConsumedMessage> messages = consumer.poll(100, 1000);`} />
+      <p className="text-slate-300 mt-4 mb-8 leading-relaxed">
+        When using <code>seekByTime()</code>, the SDK automatically updates the broker's committed offset for your consumer group, ensuring a seamless failover and cluster-wide consistency.
+      </p>
+
       <h2 className="text-2xl font-semibold text-slate-100 mt-10 mb-4">Persistent Storage</h2>
       <p className="text-slate-300 mb-4 leading-relaxed">
         DRMQ writes every incoming message to a Write-Ahead Log before returning a success response to the producer. Log data is organized into fixed-size segments (default 100 MB each) retained for a configurable window (default 7 days). This means:

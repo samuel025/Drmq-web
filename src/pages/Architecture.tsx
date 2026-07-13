@@ -37,10 +37,10 @@ export function Architecture() {
           <div className="text-sm font-bold text-purple-400 mb-3 uppercase tracking-wider">Storage Layer</div>
           <p className="text-slate-300 leading-relaxed">
             MessageStore manages the on-disk topic data using a segmented, append-only log. 
-            Each topic is a directory of .log files (100MB each) with corresponding .idx sparse 
-            index files. The RaftLog itself uses a separate binary-encoded file to persist Raft 
-            log entries. Consumer group offsets are also persisted inside the Raft log as 
-            CommitOffsetCommand entries, giving them the same durability guarantee as messages.
+            Each topic is a directory of .log files (100MB each). The RaftLog itself uses a 
+            separate binary-encoded file to persist Raft log entries. Consumer group offsets 
+            are also persisted inside the Raft log as CommitOffsetCommand entries, giving them 
+            the same durability guarantee as messages.
           </p>
         </div>
       </div>

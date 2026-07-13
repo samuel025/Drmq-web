@@ -84,23 +84,30 @@ const producer = new DRMQProducer("broker1:9092,broker2:9093,broker3:9094");`} /
       <h3 className="text-xl font-semibold text-slate-200 mt-6 mb-3">Producer example</h3>
       <CodeBlock language="typescript" code={`import { DRMQProducer } from './client';
 
+// Define your DTO
+interface OrderDTO {
+  userId: string;
+  amount: number;
+  currency: string;
+}
+
 async function main() {
   const producer = new DRMQProducer("localhost:9092,localhost:9093");
   await producer.connect();
 
   try {
-    const payload = Buffer.from("Hello from TypeScript!");
-    const res = await producer.send("ts-topic", payload);
+    const order: OrderDTO = { userId: "user-123", amount: 99.50, currency: "USD" };
+    // Serialize object to JSON buffer
+    const payload = Buffer.from(JSON.stringify(order));
+    
+    // Send with an optional routing key
+    const res = await producer.send("orders", payload, "user-123");
+    
     if (res.success) {
-      console.log(\`Message persisted at offset \${res.offset}\`);
+      console.log(\`Order persisted at offset \${res.offset}\`);
     } else {
       console.error(\`Send failed: \${res.errorMessage}\`);
     }
-
-    // Send with an optional routing key
-    const orderData = Buffer.from(JSON.stringify({ id: 42, amount: 99.99 }));
-    const keyedRes = await producer.send("orders", orderData, "order-42");
-    console.log(\`Keyed send at offset \${keyedRes.offset}\`);
   } finally {
     producer.close();
   }
@@ -128,6 +135,7 @@ const consumer = new DRMQConsumer("localhost:9092");`} />
           ['await connect()', 'Promise<void>', 'Opens a TCP connection to one of the bootstrap brokers.'],
           ['autoCommit (property)', 'boolean', 'Set to true to auto-commit after each poll(). Default: false. Assign directly: consumer.autoCommit = true.'],
           ['await subscribe(topic, fromOffset?)', 'Promise<void>', 'Register interest in topic. In group mode, broker manages offsets. Pass fromOffset to override.'],
+          ['await seekByTime(topic, timestamp)', 'Promise<void>', 'Seek to the first message at or after the given Unix epoch timestamp (ms).'],
           ['await poll(maxMessages?, timeoutMs?)', 'Promise<StoredMessage[]>', 'Fetch up to maxMessages (default 100). Broker waits up to timeoutMs ms (default 1000).'],
           ['await commit(topic, nextOffset)', 'Promise<void>', 'Commit nextOffset to the broker for topic.'],
           ['await nack(topic, offset)', 'Promise<boolean>', 'Reject a message. Returns true if routed to DLQ, false if requeued. Throws Error in single mode.'],
@@ -166,15 +174,25 @@ const consumer = new DRMQConsumer("localhost:9092");`} />
       <h3 className="text-xl font-semibold text-slate-200 mt-6 mb-3">Example 1 — Group mode (auto-commit)</h3>
       <CodeBlock language="typescript" code={`import { DRMQConsumer } from './client';
 
+interface OrderDTO {
+  userId: string;
+  amount: number;
+  currency: string;
+}
+
 async function main() {
   const consumer = new DRMQConsumer("localhost:9092,localhost:9093", "ts-workers");
   consumer.autoCommit = true;
   await consumer.connect();
-  await consumer.subscribe("ts-topic");
+  await consumer.subscribe("orders");
 
   const messages = await consumer.poll(10, 5000);
   for (const msg of messages) {
-    console.log(\`Received (offset \${msg.offset}): \${Buffer.from(msg.payload).toString('utf-8')}\`);
+    // Deserialize raw bytes back to JSON object
+    const orderStr = Buffer.from(msg.payload).toString('utf-8');
+    const order: OrderDTO = JSON.parse(orderStr);
+    
+    console.log(\`Received order from \${order.userId} for \${order.amount} (offset \${msg.offset})\`);
   }
 
   consumer.close();
@@ -223,6 +241,24 @@ main().catch(console.error);`} />
       );
     }
   }
+}
+
+main().catch(console.error);`} />
+
+      <h3 className="text-xl font-semibold text-slate-200 mt-6 mb-3">Example 4 — Time-Based Log Replay</h3>
+      <CodeBlock language="typescript" code={`async function main() {
+  const consumer = new DRMQConsumer("localhost:9092"); // works in both single and group mode
+  await consumer.connect();
+
+  // Replay from exactly 1 hour ago
+  const targetTimestamp = Date.now() - (60 * 60 * 1000);
+  
+  // The SDK automatically asks the broker for the exact offset
+  await consumer.seekByTime("user-activity", targetTimestamp);
+
+  // Poll will naturally fetch from the new offset
+  const messages = await consumer.poll(100, 1000);
+  console.log(\`Fetched \${messages.length} messages from the past hour.\`);
 }
 
 main().catch(console.error);`} />

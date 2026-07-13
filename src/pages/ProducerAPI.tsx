@@ -66,18 +66,24 @@ DRMQProducer()                        // defaults to localhost:9092`} />
       </div>
 
       <h3 className="text-xl font-semibold text-slate-200 mt-6 mb-3">Producer example</h3>
-      <CodeBlock language="java" code={`try (DRMQProducer producer = new DRMQProducer("localhost:9092,localhost:9093")) {
+      <CodeBlock language="java" code={`import com.fasterxml.jackson.databind.ObjectMapper;
+
+try (DRMQProducer producer = new DRMQProducer("localhost:9092,localhost:9093")) {
     producer.connect();
-    DRMQProducer.SendResult result = producer.send("my-topic", "Hello, DRMQ!").get(); // Block on future
+    ObjectMapper mapper = new ObjectMapper();
+
+    // Create a DTO and serialize it to JSON bytes
+    OrderDTO order = new OrderDTO("user-123", 99.50, "USD");
+    byte[] payload = mapper.writeValueAsBytes(order);
+
+    DRMQProducer.SendResult result = producer.send("orders", payload, "user-123").get(); // Block on future
+    
     if (result.isSuccess()) {
-        System.out.println("Message persisted at offset " + result.getOffset());
+        System.out.println("Order persisted at offset " + result.getOffset());
     } else {
         System.err.println("Send failed: " + result.getErrorMessage());
     }
-    // Send binary with key
-    DRMQProducer.SendResult r2 = producer.send("orders", loadOrderBytes(), "order-id-42").get();
-    System.out.println("Keyed send success: " + r2.isSuccess());
-} catch (IOException e) {
+} catch (Exception e) {
     e.printStackTrace();
 }`} />
 
@@ -139,7 +145,8 @@ DRMQConsumer(String host, int port)                        // single broker`} />
       </div>
 
       <h3 className="text-xl font-semibold text-slate-200 mt-6 mb-3">Example 1 — Group mode with auto-commit</h3>
-      <CodeBlock language="java" code={`DRMQConsumer consumer = new DRMQConsumer("localhost:9092,localhost:9093", "order-processors");
+      <CodeBlock language="java" code={`ObjectMapper mapper = new ObjectMapper();
+DRMQConsumer consumer = new DRMQConsumer("localhost:9092,localhost:9093", "order-processors");
 consumer.setAutoCommit(true);
 consumer.connect();
 consumer.subscribe("orders");
@@ -147,7 +154,10 @@ consumer.subscribe("orders");
 while (true) {
     List<DRMQConsumer.ConsumedMessage> messages = consumer.poll(100, 1000);
     for (DRMQConsumer.ConsumedMessage msg : messages) {
-        System.out.printf("Received (offset %d): %s%n", msg.offset(), msg.payloadAsString());
+        // Deserialize JSON bytes back to DTO
+        OrderDTO order = mapper.readValue(msg.payload(), OrderDTO.class);
+        System.out.printf("Received order %s (amount: %.2f) at offset %d%n", 
+                          order.getUserId(), order.getAmount(), msg.offset());
     }
 }`} />
 

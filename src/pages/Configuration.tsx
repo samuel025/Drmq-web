@@ -30,7 +30,7 @@ export function Configuration() {
                 ['dlq-topic-prefix', 'String', 'dlq.', 'String prefix for DLQ topics (e.g. dlq.payments-group.orders).'],
                 ['log-segment-bytes', 'Long', '100MB', 'Max size (bytes) of a log segment before rolling (default: 104857600).'],
                 ['log-retention-ms', 'Long', '7 Days', 'Time (ms) to keep inactive log segments before deletion (default: 604800000).'],
-                ['raft-compact-threshold', 'Long', '1000', 'Number of committed Raft log entries that triggers an asynchronous snapshot.'],
+                ['raft-compact-threshold', 'Long', '5000', 'Number of committed Raft log entries that triggers an asynchronous snapshot.'],
                 ['metrics-enabled', 'Boolean', 'true', 'Set to false to disable the Prometheus metrics HTTP endpoint.'],
                 ['metrics-disabled', 'Flag', 'none', 'A standalone flag (no value required) equivalent to --metrics-enabled false.'],
                 ['metrics-port', 'Integer', '9096', 'The TCP port on which the broker exposes Prometheus metrics over HTTP.'],

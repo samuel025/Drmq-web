@@ -35,7 +35,7 @@ export function ConsumerAPI() {
       </p>
       <CodeBlock 
         language="java"
-        code={`import com.drmq.client.DRMQConsumer;\nimport com.drmq.client.DRMQConsumer.ConsumedMessage;\n\n// Initialize with bootstrap servers and consumer group ID\nDRMQConsumer consumer = new DRMQConsumer("10.0.1.10:9092,10.0.1.11:9092", "analytics-group");\nconsumer.connect();\n\n// Let the broker manage the offset\nconsumer.subscribe("orders");\n\n// Optional: Enable auto-commit after every poll\nconsumer.setAutoCommit(true);\n\nwhile (true) {\n    // Poll max 100 messages. Wait up to 2000ms if queue is empty (Long Polling)\n    List<ConsumedMessage> messages = consumer.poll(100, 2000);\n\n    for (ConsumedMessage msg : messages) {\n        System.out.printf("Offset: %d, Key: %s, Data: %s%n", \n            msg.offset(), msg.key(), msg.payloadAsString());\n    }\n}`}
+        code={`import com.drmq.client.DRMQConsumer;\nimport com.drmq.client.DRMQConsumer.ConsumedMessage;\nimport com.fasterxml.jackson.databind.ObjectMapper;\n\n// Initialize with bootstrap servers and consumer group ID\nDRMQConsumer consumer = new DRMQConsumer("10.0.1.10:9092,10.0.1.11:9092", "analytics-group");\nconsumer.connect();\nObjectMapper mapper = new ObjectMapper();\n\n// Let the broker manage the offset\nconsumer.subscribe("orders");\n\n// Optional: Enable auto-commit after every poll\nconsumer.setAutoCommit(true);\n\nwhile (true) {\n    // Poll max 100 messages. Wait up to 2000ms if queue is empty (Long Polling)\n    List<ConsumedMessage> messages = consumer.poll(100, 2000);\n\n    for (ConsumedMessage msg : messages) {\n        OrderDTO order = mapper.readValue(msg.payload(), OrderDTO.class);\n        System.out.printf("Offset: %d, Key: %s, User: %s, Amount: %.2f%n", \n            msg.offset(), msg.key(), order.getUserId(), order.getAmount());\n    }\n}`}
       />
 
       <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">The Fan-Out Pattern (Multiple Groups)</h2>
@@ -55,6 +55,15 @@ export function ConsumerAPI() {
       <CodeBlock 
         language="java"
         code={`consumer.setAutoCommit(false);\n\n// Override the broker's offset and explicitly resume from offset 500\nconsumer.subscribe("orders", 500L);\n\nList<ConsumedMessage> messages = consumer.poll(50, 1000);\nfor (ConsumedMessage msg : messages) {\n    processInDatabase(msg);\n}\n\n// Manually commit the offset to the broker\nif (!messages.isEmpty()) {\n    long lastOffset = messages.get(messages.size() - 1).offset();\n    consumer.commit("orders", lastOffset + 1);\n}`}
+      />
+
+      <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Time-Based Log Replay (seekByTime)</h2>
+      <p className="text-slate-300 mb-4">
+        Instead of seeking by an arbitrary offset index, you can replay messages starting from a specific historical date and time. The broker will efficiently scan its segment indexes and automatically align your consumer to the first message recorded at or after the provided Unix timestamp. This seamlessly integrates with both Single Mode and Group Mode (the SDK auto-commits the offset if operating in a consumer group).
+      </p>
+      <CodeBlock 
+        language="java"
+        code={`import java.time.Instant;\n\n// 1. Get your target time as Unix epoch milliseconds\nlong targetTimestamp = Instant.parse("2026-07-13T10:30:00Z").toEpochMilli();\n\n// 2. Tell the consumer to seek to that time\nconsumer.seekByTime("orders", targetTimestamp);\n\n// 3. Poll as normal! The broker will stream messages from that exact point.\nList<ConsumedMessage> messages = consumer.poll(50, 1000);`}
       />
 
       <h2 className="text-2xl font-semibold text-slate-100 mb-4 mt-10">Dead-Letter Queues (DLQ) & Explicit NACK</h2>
