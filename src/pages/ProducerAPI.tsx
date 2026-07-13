@@ -104,6 +104,7 @@ DRMQConsumer(String host, int port)                        // single broker`} />
           ['setGroupMode(boolean)', 'void', 'Set to false for single-consumer mode and full manual offset control.'],
           ['subscribe(String topic)', 'void', 'Subscribe to topic. Broker assigns offsets in group mode.'],
           ['subscribe(String topic, long fromOffset)', 'void', 'Subscribe starting from fromOffset. Use 0 to replay from the beginning.'],
+          ['seekByTime(String topic, long timestamp)', 'void', 'Seek to the first message at or after the given Unix epoch timestamp (ms).'],
           ['poll()', 'List<ConsumedMessage>', 'Fetch up to 100 messages with a 1-second broker wait.'],
           ['poll(int maxMessages)', 'List<ConsumedMessage>', 'Fetch up to maxMessages with a 1-second broker wait.'],
           ['poll(int maxMessages, long timeoutMs)', 'List<ConsumedMessage>', 'Fetch up to maxMessages waiting up to timeoutMs ms on the broker side.'],
@@ -196,6 +197,22 @@ while (true) {
         }
     }
 } catch (IOException e) { e.printStackTrace(); }`} />
+
+      <h3 className="text-xl font-semibold text-slate-200 mt-6 mb-3">Example 4 — Time-Based Log Replay</h3>
+      <CodeBlock language="java" code={`try (DRMQConsumer consumer = new DRMQConsumer("localhost:9092", "analytics-group")) {
+    consumer.connect();
+
+    // Rewind the group to exactly 12 hours ago
+    long targetTime = System.currentTimeMillis() - (12 * 60 * 60 * 1000);
+    
+    // The SDK automatically asks the broker for the exact offset
+    consumer.seekByTime("orders", targetTime);
+
+    // The consumer will naturally resume fetching from the new offset
+    List<DRMQConsumer.ConsumedMessage> messages = consumer.poll(100, 1000);
+    System.out.printf("Fetched %d messages from the past 12 hours.%n", messages.size());
+} catch (IOException e) { e.printStackTrace(); }`} />
+
       <div className="border-l-4 border-rose-500 bg-rose-500/10 rounded-r-lg p-4 mt-4">
         <p className="text-sm text-rose-200/80"><strong>Warning:</strong> <code>nack()</code> throws <code>IllegalStateException</code> in single-consumer mode. Dead-letter routing requires group mode.</p>
       </div>
