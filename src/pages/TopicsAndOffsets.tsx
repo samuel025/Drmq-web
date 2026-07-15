@@ -143,14 +143,20 @@ List<DRMQConsumer.ConsumedMessage> messages = consumer.poll(100, 1000);`} />
         When using <code>seekByTime()</code>, the SDK automatically updates the broker's committed offset for your consumer group, ensuring a seamless failover and cluster-wide consistency.
       </p>
 
-      <h2 className="text-2xl font-semibold text-slate-100 mt-10 mb-4">Persistent Storage</h2>
+      <h2 className="text-2xl font-semibold text-slate-100 mt-10 mb-4">Persistent Storage & InfinityLog</h2>
       <p className="text-slate-300 mb-4 leading-relaxed">
-        DRMQ writes every incoming message to a Write-Ahead Log before returning a success response to the producer. Log data is organized into fixed-size segments (default 100 MB each) retained for a configurable window (default 7 days). This means:
+        DRMQ writes every incoming message to an append-only `.log` segment before returning a success response to the producer. Log data is organized into fixed-size segments (default 100 MB each) retained on the local SSD for a configurable window (default 7 days).
       </p>
+      <div className="bg-slate-800/50 border-l-4 border-emerald-500 p-4 mb-6 rounded-r-md">
+        <h3 className="text-lg font-semibold text-emerald-400 mb-2">InfinityLog (Transparent Tiered Storage)</h3>
+        <p className="text-slate-300 text-sm">
+          When a segment ages out locally, DRMQ can either delete it permanently or seamlessly archive it using <strong>InfinityLog</strong>. If configured, DRMQ uploads aged-out segments to any S3-compatible cloud storage (AWS, Cloudflare R2, MinIO). Later, if a consumer attempts to replay a deleted offset, the broker transparently pauses the consumer, fetches the historical segment from the cloud back to the local disk, and serves the messages as if they never left.
+        </p>
+      </div>
       <ul className="list-disc list-inside text-slate-300 space-y-2 mb-8 ml-2">
         <li>Broker restarts do not lose any acknowledged messages.</li>
-        <li>You can replay historical data up to the retention boundary.</li>
-        <li>In cluster mode, the Raft snapshot mechanism compacts the log while preserving correctness.</li>
+        <li>You can replay historical data infinitely, limited only by your cloud storage capacity.</li>
+        <li>Your local SSD costs remain low, while consumers perceive the broker as having an infinite disk.</li>
       </ul>
     </div>
   );
