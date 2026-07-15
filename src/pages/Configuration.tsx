@@ -1,3 +1,5 @@
+import { CodeBlock } from '../components/CodeBlock';
+
 export function Configuration() {
   return (
     <div>
@@ -7,6 +9,18 @@ export function Configuration() {
         The broker can be configured either through a <code>.properties</code> file (recommended) or entirely via command-line arguments. 
         Command-line flags will always override values set in the properties file.
       </p>
+
+      <h2 className="text-2xl font-semibold text-slate-100 mt-10 mb-4">Using a configuration file</h2>
+      <p className="text-slate-300 mb-4 leading-relaxed">
+        For production deployments, it is highly recommended to use a configuration file instead of a long list of CLI arguments.
+      </p>
+      <CodeBlock language="properties" code={`node.id=broker1
+port=9092
+data.dir=./data-1
+peers=broker2:localhost:9093,broker3:localhost:9094
+log.segment.bytes=104857600
+log.retention.ms=604800000
+raft.compact.threshold=5000`} />
 
       <h2 className="text-2xl font-semibold text-slate-100 mb-6 mt-10">Startup Arguments</h2>
       <div className="rounded-lg border border-slate-700/50 overflow-hidden my-6 bg-slate-800/40">

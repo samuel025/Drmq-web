@@ -61,7 +61,7 @@ cd drmq-broker
 mvn exec:java -Dexec.args="--node-id 3 --port 9094 --data-dir ./data-3 --peers 1:localhost:9092,2:localhost:9093"`}
       />
 
-      <div className="border-l-4 border-yellow-500 bg-yellow-500/10 rounded-r-lg p-5 my-8">
+      <div className="bg-yellow-500/10 rounded-lg p-5 my-8">
         <div className="flex">
           <div className="ml-3">
             <h3 className="text-sm font-medium text-yellow-400 uppercase tracking-wide mb-1">Important</h3>

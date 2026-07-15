@@ -26,10 +26,10 @@ export function DLQ() {
         <li><code>false</code> — the broker requeued the message for redelivery to another consumer in the group.</li>
       </ul>
       <CodeBlock language="java" code={`boolean routedToDlq = consumer.nack("orders", msg.offset());`} />
-      <div className="border-l-4 border-blue-500 bg-blue-500/10 rounded-r-lg p-4 my-4">
+      <div className="bg-blue-500/10 rounded-lg p-4 my-4">
         <p className="text-sm text-blue-200/80"><code>nack()</code> is only supported in <strong>group mode</strong>. Calling it when group mode is disabled throws an <code>IllegalStateException</code>.</p>
       </div>
-      <div className="border-l-4 border-rose-500 bg-rose-500/10 rounded-r-lg p-4 mb-8">
+      <div className="bg-rose-500/10 rounded-lg p-4 mb-8">
         <p className="text-sm text-rose-200/80"><strong>Warning:</strong> Single consumer mode does not support NACK. If you need DLQ behaviour, ensure you construct your consumer with a consumer group name so that group mode is enabled automatically.</p>
       </div>
 

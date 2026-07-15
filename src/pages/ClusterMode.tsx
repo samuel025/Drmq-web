@@ -49,7 +49,7 @@ export function ClusterMode() {
           </tbody>
         </table>
       </div>
-      <div className="border-l-4 border-blue-500 bg-blue-500/10 rounded-r-lg p-4 mb-8">
+      <div className="bg-blue-500/10 rounded-lg p-4 mb-8">
         <p className="text-sm text-blue-200/80">A 3-node cluster is the recommended minimum for production. It tolerates the loss of one node during a rolling upgrade or crash while still accepting writes. A 5-node cluster tolerates two simultaneous failures, appropriate for multi-availability-zone deployments.</p>
       </div>
 
@@ -104,7 +104,7 @@ consumer.subscribe("orders");`} />
       </ol>
 
       <h2 className="text-2xl font-semibold text-slate-100 mt-10 mb-4">Single-Node Mode: No Raft Overhead</h2>
-      <div className="border-l-4 border-blue-500 bg-blue-500/10 rounded-r-lg p-4 mb-6">
+      <div className="bg-blue-500/10 rounded-lg p-4 mb-6">
         <p className="text-sm text-blue-200/80">If you start a broker with <strong>no <code>--peers</code> argument</strong>, it runs in <strong>single-node mode</strong> with all Raft consensus logic disabled. There is no election overhead, no replication latency, and no quorum requirement. Single-node mode is ideal for local development, CI pipelines, and integration testing.</p>
       </div>
 

@@ -9,7 +9,7 @@ export function PythonClient() {
         The DRMQ Python client lets you send and receive messages using the same TCP/Protobuf protocol as the Java SDK. It lives in the <code>drmq-python-client/</code> directory and requires no external broker-specific package — only the standard <code>protobuf</code> library. Both <code>DRMQProducer</code> and <code>DRMQConsumer</code> inherit from a shared <code>DRMQClient</code> base that manages connection pooling, bootstrap-server rotation, and transparent leader redirection via typed <code>ErrorCode</code>s.
       </p>
 
-      <div className="border-l-4 border-cyan-500 bg-cyan-500/10 rounded-r-lg p-4 mt-4 mb-8">
+      <div className="bg-cyan-500/10 rounded-lg p-4 mt-4 mb-8">
         <p className="text-sm text-cyan-200/80"><strong>Client-Side Batching:</strong> Similar to the Java client, the <code>send()</code> method places messages into an internal accumulator queue. A dedicated background thread groups these messages into a single <code>ProduceBatchRequest</code>, waiting up to <strong>5ms (linger.ms)</strong> or until the batch reaches <strong>16KB</strong> before flushing to the network. This provides massive throughput gains.</p>
       </div>
 
@@ -97,7 +97,7 @@ try:
         print(f"Send failed: {res.error_message}")
 finally:
     producer.close()`} />
-      <div className="border-l-4 border-cyan-500 bg-cyan-500/10 rounded-r-lg p-4 my-4">
+      <div className="bg-cyan-500/10 rounded-lg p-4 my-4">
         <p className="text-sm text-cyan-200/80"><strong>Tip:</strong> You do not need to pre-create a topic. DRMQ creates topics implicitly on the first produce call.</p>
       </div>
 
@@ -230,7 +230,7 @@ try:
     print(f"Fetched {len(messages)} messages from the past hour.")
 finally:
     consumer.close()`} />
-      <div className="border-l-4 border-rose-500 bg-rose-500/10 rounded-r-lg p-4 mt-4">
+      <div className="bg-rose-500/10 rounded-lg p-4 mt-4">
         <p className="text-sm text-rose-200/80"><strong>Warning:</strong> <code>nack()</code> raises <code>RuntimeError</code> when called in single-consumer mode. Dead-letter routing is only available when a <code>group_id</code> is set.</p>
       </div>
     </div>

@@ -35,7 +35,7 @@ Group "analytics" (independent)
         <li>Every consumer in the group stays busy as long as there are unprocessed messages.</li>
         <li>There is no concept of a "partition owner" or rebalance event.</li>
       </ul>
-      <div className="border-l-4 border-blue-500 bg-blue-500/10 rounded-r-lg p-4 mb-8">
+      <div className="bg-blue-500/10 rounded-lg p-4 mb-8">
         <p className="text-sm text-blue-200/80"><strong>Note:</strong> Because lease-based dispatch ties each in-flight message to a specific consumer instance, uncommitted messages are automatically redelivered if that consumer disconnects before committing. Always design your consumers to be <strong>idempotent</strong>.</p>
       </div>
 
@@ -90,7 +90,7 @@ c2.subscribe("orders");
 }`} />
         </div>
       </div>
-      <div className="border-l-4 border-rose-500 bg-rose-500/10 rounded-r-lg p-4 mb-8">
+      <div className="bg-rose-500/10 rounded-lg p-4 mb-8">
         <p className="text-sm text-rose-200/80"><strong>Warning:</strong> <code>nack()</code> is only supported in group mode. Calling it on a single-mode consumer throws <code>IllegalStateException</code>.</p>
       </div>
 
@@ -148,7 +148,7 @@ c2.subscribe("orders");
         }
     }
 }`} />
-      <div className="border-l-4 border-blue-500 bg-blue-500/10 rounded-r-lg p-4 mt-4">
+      <div className="bg-blue-500/10 rounded-lg p-4 mt-4">
         <p className="text-sm text-blue-200/80"><strong>Note:</strong> The DLQ topic name follows the pattern <code>dlq.&lt;groupName&gt;.&lt;originalTopic&gt;</code>. Subscribe a separate consumer to that topic to inspect, retry, or alert on failed messages.</p>
       </div>
     </div>

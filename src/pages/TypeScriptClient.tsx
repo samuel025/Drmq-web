@@ -9,7 +9,7 @@ export function TypeScriptClient() {
         The DRMQ TypeScript client provides a fully async, promise-based API for producing and consuming messages against a DRMQ broker cluster. It lives in the <code>drmq-ts-client/</code> directory and communicates using the same TCP/Protobuf protocol as the Java and Python SDKs. Both <code>DRMQProducer</code> and <code>DRMQConsumer</code> extend a shared <code>DRMQClient</code> base that manages connection lifecycle, bootstrap-server rotation, and transparent leader redirection via typed <code>ErrorCode</code>s.
       </p>
 
-      <div className="border-l-4 border-cyan-500 bg-cyan-500/10 rounded-r-lg p-4 mt-4 mb-8">
+      <div className="bg-cyan-500/10 rounded-lg p-4 mt-4 mb-8">
         <p className="text-sm text-cyan-200/80"><strong>Client-Side Batching:</strong> Similar to the Java client, the <code>send()</code> method places messages into an internal accumulator queue. A dedicated background loop groups these messages into a single <code>ProduceBatchRequest</code>, waiting up to <strong>5ms (linger.ms)</strong> or until the batch reaches <strong>16KB</strong> before flushing to the network. This ensures extremely high throughput under load.</p>
       </div>
 
@@ -262,7 +262,7 @@ main().catch(console.error);`} />
 }
 
 main().catch(console.error);`} />
-      <div className="border-l-4 border-rose-500 bg-rose-500/10 rounded-r-lg p-4 mt-4">
+      <div className="bg-rose-500/10 rounded-lg p-4 mt-4">
         <p className="text-sm text-rose-200/80"><strong>Warning:</strong> <code>nack()</code> throws an <code>Error</code> when called without a <code>groupId</code>. Dead-letter routing is only available in group mode.</p>
       </div>
     </div>

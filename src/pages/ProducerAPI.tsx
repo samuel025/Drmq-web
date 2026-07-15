@@ -9,7 +9,7 @@ export function ProducerAPI() {
         The DRMQ Java client is the primary SDK for producing and consuming messages against a DRMQ broker cluster. It wraps the custom TCP/Protobuf protocol in a clean, asynchronous API that handles automatic leader redirection via typed Protocol Buffer <code>ErrorCode</code>s, bootstrap-server failover, and offset management. Both <code>DRMQProducer</code> and <code>DRMQConsumer</code> implement <code>AutoCloseable</code>.
       </p>
 
-      <div className="border-l-4 border-cyan-500 bg-cyan-500/10 rounded-r-lg p-4 mt-4 mb-8">
+      <div className="bg-cyan-500/10 rounded-lg p-4 mt-4 mb-8">
         <p className="text-sm text-cyan-200/80"><strong>Client-Side Batching:</strong> The <code>send()</code> method is asynchronous. It instantly places messages into an internal accumulator queue. A dedicated background thread groups these messages into a single <code>ProduceBatchRequest</code>, waiting up to <strong>5ms (linger.ms)</strong> or until the batch reaches <strong>16KB</strong> before flushing to the network. This provides massive throughput gains while maintaining low latency.</p>
       </div>
 
@@ -213,7 +213,7 @@ while (true) {
     System.out.printf("Fetched %d messages from the past 12 hours.%n", messages.size());
 } catch (IOException e) { e.printStackTrace(); }`} />
 
-      <div className="border-l-4 border-rose-500 bg-rose-500/10 rounded-r-lg p-4 mt-4">
+      <div className="bg-rose-500/10 rounded-lg p-4 mt-4">
         <p className="text-sm text-rose-200/80"><strong>Warning:</strong> <code>nack()</code> throws <code>IllegalStateException</code> in single-consumer mode. Dead-letter routing requires group mode.</p>
       </div>
     </div>

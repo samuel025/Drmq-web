@@ -31,7 +31,7 @@ export function TopicsAndOffsets() {
       <p className="text-slate-300 mb-4 leading-relaxed">
         An offset is a <strong>sequential, monotonically increasing integer</strong> that uniquely identifies a message's position in the broker's log. Offsets never reset and never reuse a value.
       </p>
-      <div className="border-l-4 border-blue-500 bg-blue-500/10 rounded-r-lg p-4 mb-6">
+      <div className="bg-blue-500/10 rounded-lg p-4 mb-6">
         <p className="text-sm text-blue-200/80"><strong>Note:</strong> DRMQ uses a <strong>single broker-wide offset counter</strong> shared across all topics, not a separate counter per topic. This means the first message on a newly created topic does not necessarily receive offset <code>0</code> — it receives the next available value from the global counter. Within a single topic, offsets are always ascending, but may not be contiguous (e.g., <code>0, 3, 7, 11</code>) if other topics received messages in between.</p>
       </div>
       <p className="text-slate-300 mb-4">When you call <code>producer.send(topic, payload)</code>, the broker returns a <code>SendResult</code> that carries the assigned offset:</p>
@@ -67,7 +67,7 @@ while (true) {
         process(msg); // offset committed automatically after poll
     }
 }`} />
-          <div className="border-l-4 border-amber-500 bg-amber-500/10 rounded-r-lg p-3 mt-3">
+          <div className="bg-amber-500/10 rounded-lg p-3 mt-3">
             <p className="text-xs text-amber-200/80">If your consumer crashes between <code>poll()</code> and your logic completing, the commit may have already fired — those messages <strong>will not</strong> be redelivered. This is <strong>at-most-once</strong> delivery.</p>
           </div>
         </div>
@@ -87,7 +87,7 @@ while (true) {
         consumer.commit("orders", msg.offset() + 1);
     }
 }`} />
-          <div className="border-l-4 border-blue-500 bg-blue-500/10 rounded-r-lg p-3 mt-3">
+          <div className="bg-blue-500/10 rounded-lg p-3 mt-3">
             <p className="text-xs text-blue-200/80">Pass <code>offset + 1</code> to <code>commit()</code> — the argument is the offset of the <strong>next</strong> message to consume.</p>
           </div>
         </div>
@@ -147,7 +147,7 @@ List<DRMQConsumer.ConsumedMessage> messages = consumer.poll(100, 1000);`} />
       <p className="text-slate-300 mb-4 leading-relaxed">
         DRMQ writes every incoming message to an append-only `.log` segment before returning a success response to the producer. Log data is organized into fixed-size segments (default 100 MB each) retained on the local SSD for a configurable window (default 7 days).
       </p>
-      <div className="bg-slate-800/50 border-l-4 border-emerald-500 p-4 mb-6 rounded-r-md">
+      <div className="bg-slate-800/50 p-4 mb-6 rounded-md">
         <h3 className="text-lg font-semibold text-emerald-400 mb-2">InfinityLog (Transparent Tiered Storage)</h3>
         <p className="text-slate-300 text-sm">
           When a segment ages out locally, DRMQ can either delete it permanently or seamlessly archive it using <strong>InfinityLog</strong>. If configured, DRMQ uploads aged-out segments to any S3-compatible cloud storage (AWS, Cloudflare R2, MinIO). Later, if a consumer attempts to replay a deleted offset, the broker transparently pauses the consumer, fetches the historical segment from the cloud back to the local disk, and serves the messages as if they never left.
