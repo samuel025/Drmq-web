@@ -4,8 +4,8 @@ export function Configuration() {
       <h1 className="text-4xl font-bold text-white mb-6">Broker Configuration Reference</h1>
       
       <p className="text-lg text-slate-300 mb-8 leading-relaxed">
-        The broker is configured entirely through command-line arguments. There is no configuration
-        file; all settings are passed as explicit flags at startup.
+        The broker can be configured either through a <code>.properties</code> file (recommended) or entirely via command-line arguments. 
+        Command-line flags will always override values set in the properties file.
       </p>
 
       <h2 className="text-2xl font-semibold text-slate-100 mb-6 mt-10">Startup Arguments</h2>
@@ -22,10 +22,14 @@ export function Configuration() {
             </thead>
             <tbody className="divide-y divide-slate-700/50">
               {[
+                ['config', 'String', 'none', 'Path to a standard Java .properties file containing broker configuration.'],
                 ['node-id / id', 'String', 'standalone', 'Unique identifier for this broker within the Raft cluster. Use --id as an alias. Must be stable across restarts.'],
                 ['port', 'Integer', '9092', 'TCP port on which the Netty server listens for both client connections and inbound Raft RPC traffic.'],
                 ['data-dir', 'String', './data', 'Root directory for all persistent state. Each node must have its own dedicated directory.'],
                 ['peers', 'String', 'none', 'Comma-separated list of peer addresses (e.g. 2:host:9093,3:host:9094). Omit for single-node mode.'],
+                ['s3-archive-bucket', 'String', 'none', 'The name of the S3 or MinIO bucket for InfinityLog Tiered Storage.'],
+                ['s3-archive-region', 'String', 'us-east-1', 'The AWS region for the InfinityLog S3 bucket.'],
+                ['s3-archive-endpoint', 'String', 'none', 'Optional custom endpoint URL for the S3 API (e.g. for MinIO).'],
                 ['max-deliveries', 'Integer', '5', 'Max attempts before routing to the Dead-Letter Queue.'],
                 ['dlq-topic-prefix', 'String', 'dlq.', 'String prefix for DLQ topics (e.g. dlq.payments-group.orders).'],
                 ['log-segment-bytes', 'Long', '100MB', 'Max size (bytes) of a log segment before rolling (default: 104857600).'],
@@ -56,7 +60,7 @@ export function Configuration() {
       <div className="mt-8 p-5 bg-cyan-900/10 border border-cyan-800/30 rounded-lg">
         <h3 className="text-cyan-400 font-semibold mb-2">Example Usage</h3>
         <code className="text-sm text-slate-300 font-mono bg-slate-900/50 px-3 py-2 rounded block whitespace-pre-wrap">
-          mvn exec:java -Dexec.args="--node-id node1 --port 9092 --data-dir /mnt/nvme/node1 --peers localhost:9093,localhost:9094 --log-segment-bytes 52428800 --raft-compact-threshold 500"
+          mvn exec:java -Dexec.args="--config server.properties"
         </code>
       </div>
     </div>

@@ -40,6 +40,23 @@ export function Storage() {
         </p>
       </div>
 
+      <h2 className="text-xl md:text-2xl font-semibold text-slate-100 mb-4 mt-10">InfinityLog (Tiered Storage)</h2>
+      <p className="text-slate-300 mb-4 leading-relaxed">
+        DRMQ features an advanced Tiered Storage architecture called <strong>InfinityLog</strong>. 
+        To decouple compute from storage and enable infinite data retention, DRMQ can automatically archive older, inactive log segments 
+        to an S3-compatible object store (like Amazon S3 or MinIO). 
+      </p>
+      <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-5 mb-10">
+        <p className="text-slate-300 text-sm leading-relaxed mb-4">
+          When a consumer requests a historical offset or seeks by a specific timestamp that is no longer present on the broker's local disk, 
+          the <code>InfinityLogResolver</code> transparently pauses the consumer, downloads the required segments from the cloud, and resumes consumption. 
+        </p>
+        <p className="text-slate-300 text-sm leading-relaxed">
+          The resolution layer is heavily fortified against "thundering herds". If hundreds of consumers request the same missing historical offset simultaneously, 
+          strict atomic locks and `.tmp` file moves guarantee that the segment is downloaded exactly once, preventing network saturation and local disk corruption.
+        </p>
+      </div>
+
       <h2 className="text-xl md:text-2xl font-semibold text-slate-100 mb-4 mt-10">Follower Reads (Single Mode Only)</h2>
       <p className="text-slate-300 mb-4 leading-relaxed">
         While the Raft Leader must handle 100% of the write traffic, DRMQ allows <strong>Single Mode</strong> consumers to completely bypass the leader for read operations. This dramatically increases the overall read-throughput of your cluster.
