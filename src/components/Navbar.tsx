@@ -40,7 +40,7 @@ export function Navbar({ onMenuClick }: NavbarProps) {
               <nav className="text-sm leading-6 font-semibold text-slate-400">
                 <ul className="flex space-x-8">
                   <li>
-                    <a href="#/" className="hover:text-cyan-400 transition-colors cursor-pointer text-cyan-500">Documentation</a>
+                    <a href="#/docs" className="hover:text-cyan-400 transition-colors cursor-pointer text-cyan-500">Documentation</a>
                   </li>
                   <li>
                     <a href="https://github.com/samuel025/DRMQ" target="_blank" rel="noreferrer" className="flex items-center hover:text-cyan-400 transition-colors cursor-pointer">

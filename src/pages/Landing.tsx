@@ -5,7 +5,7 @@ import { ArrowRight, Terminal } from 'lucide-react';
 
 export const Landing = () => {
   return (
-    <div className="min-h-screen bg-[#020617] text-zinc-300 font-sans selection:bg-emerald-500/30">
+    <div className="min-h-screen bg-black text-zinc-300 font-sans selection:bg-emerald-500/30">
       {/* Navigation - Modern Floating Pill */}
       <div className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-6 pointer-events-none px-4">
         <nav className="pointer-events-auto flex items-center justify-between px-6 py-3 border border-zinc-800/80 bg-zinc-950/50 backdrop-blur-xl rounded-full w-full max-w-4xl shadow-2xl">
@@ -30,7 +30,7 @@ export const Landing = () => {
         {/* Layer 2: Content Top Half */}
         <div className="relative z-10 flex-1 flex flex-col justify-end pb-2 items-center text-center w-full px-8 pointer-events-none">
           {/* Smooth gradient from top, fading to transparent at the hub gap */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#020617] via-[#020617]/90 to-transparent md:bg-[radial-gradient(ellipse_at_top,rgba(2,6,23,0.8)_0%,transparent_70%)] -z-10 pointer-events-none"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-black via-black/90 to-transparent md:bg-[radial-gradient(ellipse_at_top,rgba(0,0,0,0.8)_0%,transparent_70%)] -z-10 pointer-events-none"></div>
           
 
           <h1 className="text-4xl md:text-7xl font-extrabold text-white tracking-tight leading-tight drop-shadow-2xl">
@@ -45,7 +45,7 @@ export const Landing = () => {
         {/* Layer 3: Content Bottom Half */}
         <div className="relative z-10 flex-1 flex flex-col justify-start pt-4 items-center text-center w-full px-8 pointer-events-none">
           {/* Smooth gradient from bottom, fading to transparent at the hub gap */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-[#020617]/90 to-transparent md:bg-[radial-gradient(ellipse_at_bottom,rgba(2,6,23,0.8)_0%,transparent_70%)] -z-10 pointer-events-none"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/90 to-transparent md:bg-[radial-gradient(ellipse_at_bottom,rgba(0,0,0,0.8)_0%,transparent_70%)] -z-10 pointer-events-none"></div>
           
           <p className="text-lg md:text-xl text-zinc-300 mb-8 max-w-2xl leading-relaxed drop-shadow-lg font-medium">
             DRMQ is a distributed, fault-tolerant messaging system built from scratch in Java. 

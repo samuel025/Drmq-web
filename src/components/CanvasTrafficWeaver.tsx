@@ -297,7 +297,7 @@ export const CanvasTrafficWeaver = () => {
       // Inner Hub body
       ctx.beginPath();
       ctx.arc(centerX, centerY, hub.radius, 0, Math.PI * 2);
-      ctx.fillStyle = '#020617';
+      ctx.fillStyle = '#000000';
       ctx.fill();
       
       ctx.beginPath();
