@@ -160,6 +160,24 @@ raft.compact.threshold=5000`} />
   --metrics-path /metrics"`} />
       </div>
 
+      <p className="text-slate-300 mt-6 mb-4 leading-relaxed">
+        The equivalent configuration using a <code>broker.properties</code> file would be:
+      </p>
+
+      <div className="mb-4">
+        <CodeBlock language="properties" code={`node.id=1
+port=9092
+data.dir=/var/drmq/node-1
+peers=2:broker-2.prod.internal:9092,3:broker-3.prod.internal:9092
+log.segment.bytes=209715200
+log.retention.ms=2592000000
+raft.compact.threshold=5000
+max.deliveries=3
+dlq.topic.prefix=dead.
+metrics.port=9096
+metrics.path=/metrics`} />
+      </div>
+
       <p className="text-slate-300 mb-6 leading-relaxed">
         This example uses:<br/>
         &bull; 200 MB log segments<br/>
