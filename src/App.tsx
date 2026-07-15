@@ -1,5 +1,6 @@
 import { HashRouter, Routes, Route } from 'react-router-dom';
 import { Layout } from './components/Layout';
+import { Landing } from './pages/Landing';
 import { Introduction } from './pages/Introduction';
 import { Quickstart } from './pages/Quickstart';
 import { Installation } from './pages/Installation';
@@ -25,7 +26,8 @@ function App() {
   return (
     <HashRouter>
       <Routes>
-        <Route path="/" element={<Layout />}>
+        <Route path="/" element={<Landing />} />
+        <Route path="/docs" element={<Layout />}>
           <Route index element={<Introduction />} />
           <Route path="quickstart" element={<Quickstart />} />
           <Route path="installation" element={<Installation />} />
