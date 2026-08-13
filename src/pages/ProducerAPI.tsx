@@ -38,6 +38,8 @@ DRMQProducer()                        // defaults to localhost:9092`} />
           ['send(String topic, byte[] payload)', 'CompletableFuture<SendResult>', 'Asynchronously queues a raw byte payload.'],
           ['send(String topic, byte[] payload, String key)', 'CompletableFuture<SendResult>', 'Sends raw bytes with an optional routing key (pass null to omit).'],
           ['sendAtomic(Map<String, byte[]> payloads)', 'CompletableFuture<Map<String, Long>>', 'Sends an atomic batch to multiple distinct topics. Guaranteed to commit or fail as a single unit at the Raft level.'],
+          ['setLingerMs(long lingerMs)', 'void', 'Sets the max time the accumulator waits for more messages before flushing. Default: 5ms.'],
+          ['setBatchSizeBytes(int batchSizeBytes)', 'void', 'Sets the max size of a single batch before eager flushing. Default: 16384 (16KB).'],
           ['isConnected()', 'boolean', 'Returns true when the underlying socket is open.'],
           ['close()', 'void', 'Closes the TCP connection. Implements AutoCloseable.'],
         ].map(([m, r, d]) => (
