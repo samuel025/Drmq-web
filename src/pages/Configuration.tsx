@@ -77,8 +77,8 @@ raft.compact.threshold=5000`} />
       <ParamField name="--log-retention-ms" type="long" defaultValue="604800000">
         <p>How long the broker retains message segments before deleting them, in milliseconds. The default is 7 days (604,800,000 ms). Segments are eligible for deletion once they are older than this value <strong>and</strong> no longer the active write segment. Must be a positive integer.</p>
       </ParamField>
-      <ParamField name="--log-segment-fsync" type="boolean" defaultValue="true">
-        <p>Whether the broker strictly flushes writes to disk (<code>fsync</code>) before acknowledging them to the client. The default is <code>true</code> for maximum durability. Set to <code>false</code> to disable synchronous flushes, vastly improving throughput at the risk of data loss during a sudden power failure.</p>
+      <ParamField name="--log-segment-fsync" type="boolean" defaultValue="false">
+        <p>Whether the broker strictly flushes writes to disk (<code>fsync</code>) for the Message Store log before acknowledging them to the client. The default is <code>false</code> to maximize throughput, relying on the OS page cache and the Raft consensus log for safety. Set to <code>true</code> to enable synchronous flushes for maximum local disk durability.</p>
       </ParamField>
 
       <h2 className="text-2xl font-semibold text-slate-100 mt-10 mb-4">InfinityLog (Transparent Tiered Storage)</h2>
@@ -102,8 +102,11 @@ raft.compact.threshold=5000`} />
         <div className="mb-3"><CodeBlock language="bash" code="--peers 2:localhost:9093,3:localhost:9094" /></div>
         <p>Do not include the current node's own address in the peer list.</p>
       </ParamField>
-      <ParamField name="--raft-compact-threshold" type="long" defaultValue="1000">
+      <ParamField name="--raft-compact-threshold" type="long" defaultValue="10000">
         <p>The number of committed Raft log entries that accumulates before the broker triggers a log compaction (snapshot). Lower values reduce recovery time after a restart at the cost of more frequent compaction I/O. Must be a positive integer.</p>
+      </ParamField>
+      <ParamField name="--raft-fsync-enabled" type="boolean" defaultValue="true">
+        <p>Whether the broker strictly flushes writes to disk (<code>fsync</code>) for the Raft consensus log before acknowledging them. The default is <code>true</code> for maximum safety. Disabling this improves throughput but risks split-brain or data loss if a majority of nodes lose power simultaneously.</p>
       </ParamField>
       
       <div className="bg-blue-500/10 rounded-lg p-4 mb-6 mt-4">
@@ -214,14 +217,15 @@ metrics.path=/metrics`} />
                 ['--peers', 'string', '(none)', 'Required for cluster mode'],
                 ['--log-segment-bytes', 'long', '104857600', '100 MB'],
                 ['--log-retention-ms', 'long', '604800000', '7 days'],
-                ['--raft-compact-threshold', 'long', '5000', 'Log entries between snapshots'],
+                ['--raft-compact-threshold', 'long', '10000', 'Log entries between snapshots'],
                 ['--max-deliveries', 'int', '5', 'Attempts before DLQ routing'],
                 ['--dlq-topic-prefix', 'string', 'dlq.', 'Prefix for DLQ topic names'],
                 ['--metrics-enabled', 'boolean', 'true', 'true or false'],
                 ['--metrics-disabled', 'flag', '—', 'Shorthand for --metrics-enabled false'],
                 ['--metrics-port', 'int', '9096', 'Prometheus HTTP port'],
                 ['--metrics-path', 'string', '/metrics', 'Prometheus HTTP path'],
-                ['--log-segment-fsync', 'boolean', 'true', 'Force disk flush per batch'],
+                ['--log-segment-fsync', 'boolean', 'false', 'Force disk flush per batch'],
+                ['--raft-fsync-enabled', 'boolean', 'true', 'Force Raft log disk flush'],
                 ['--s3-archive-bucket', 'string', '(none)', 'Enable InfinityLog tiered storage'],
                 ['--s3-archive-region', 'string', 'us-east-1', 'Cloud region'],
                 ['--s3-archive-endpoint', 'string', '(none)', 'Custom endpoint for R2/MinIO/Spaces']

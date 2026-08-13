@@ -41,6 +41,7 @@ export const NAVIGATION = [
   {
     title: 'Features',
     links: [
+      { name: 'Cross-Topic Atomicity', href: '/docs/atomicity', icon: ShieldAlert },
       { name: 'Dead-Letter Queues', href: '/docs/dlq', icon: ShieldAlert },
       { name: 'Monitoring', href: '/docs/monitoring', icon: Settings },
       { name: 'Interactive CLI', href: '/docs/cli', icon: Terminal },
