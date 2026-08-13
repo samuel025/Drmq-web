@@ -48,6 +48,7 @@ producer = DRMQProducer("broker1:9092,broker2:9093,broker3:9094")`} />
         {[
           ['connect()', 'None', 'Opens a TCP socket to one of the bootstrap brokers. Raises DRMQConnectionError if no broker is reachable.'],
           ['send(topic, payload, key=None)', 'concurrent.futures.Future', 'Asynchronously queues payload (bytes) to topic. Returns a Future resolving to a ProduceResponse.'],
+          ['send_atomic(batch: dict)', 'concurrent.futures.Future', 'Sends an atomic batch to multiple topics. Expects a dictionary mapping topic -> payload bytes. Returns a Future resolving to a dictionary mapping topic -> offset.'],
           ['close()', 'None', 'Closes the underlying TCP socket.'],
         ].map(([m, r, d]) => (
           <div key={m} className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-4">
@@ -97,6 +98,25 @@ try:
         print(f"Send failed: {res.error_message}")
 finally:
     producer.close()`} />
+
+      <h3 className="text-xl font-semibold text-slate-200 mt-6 mb-3">Producer example 2 — Cross-Topic Atomic Transaction</h3>
+      <CodeBlock language="python" code={`from drmq_client import DRMQProducer
+
+producer = DRMQProducer("localhost:9092")
+try:
+    producer.connect()
+
+    # Dictionary of topic -> payload bytes
+    batch = {
+        "orders": b"order-123",
+        "inventory": b"reserve-sku-456"
+    }
+
+    offsets = producer.send_atomic(batch).result()
+    print(f"Atomic commit successful! Offsets: {offsets}")
+finally:
+    producer.close()`} />
+
       <div className="bg-cyan-500/10 rounded-lg p-4 my-4">
         <p className="text-sm text-cyan-200/80"><strong>Tip:</strong> You do not need to pre-create a topic. DRMQ creates topics implicitly on the first produce call.</p>
       </div>
