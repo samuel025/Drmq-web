@@ -21,6 +21,7 @@ import { Faults } from './pages/Faults';
 import { Monitoring } from './pages/Monitoring';
 import { CLI } from './pages/CLI';
 import { DLQ } from './pages/DLQ';
+import { CrossTopicAtomicity } from './pages/CrossTopicAtomicity';
 
 function App() {
   return (
@@ -48,6 +49,7 @@ function App() {
           <Route path="monitoring" element={<Monitoring />} />
           <Route path="cli" element={<CLI />} />
           <Route path="dlq" element={<DLQ />} />
+          <Route path="atomicity" element={<CrossTopicAtomicity />} />
           <Route path="*" element={<Introduction />} />
         </Route>
       </Routes>
