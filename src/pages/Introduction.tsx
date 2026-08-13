@@ -75,6 +75,12 @@ export function Introduction() {
             DRMQ comes with a beautiful, real-time Telemetry Dashboard so you can visually watch your messages flow through the network.
           </p>
         </div>
+        <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-5">
+          <div className="text-sm font-bold text-cyan-400 mb-2">Cross-Topic Atomic Transactions</div>
+          <p className="text-sm text-slate-400 leading-relaxed">
+            Produce messages to multiple distinct topics in a single, atomic operation. Guaranteed to commit or fail as a single unit at the Raft level.
+          </p>
+        </div>
       </div>
 
       <h2 className="text-2xl font-semibold text-slate-100 mt-10 mb-4">Quick Start Example</h2>
@@ -84,7 +90,21 @@ export function Introduction() {
       
       <CodeBlock 
         language="typescript"
-        code={`import { DRMQProducer } from 'drmq-client';\n\nconst producer = new DRMQProducer("localhost:9092,localhost:9093");\nawait producer.connect();\n\nconst res = await producer.send("my-topic", Buffer.from("Hello DRMQ!"));\nconsole.log(\`Sent at offset \${res.offset}\`);`}
+        code={`import { DRMQProducer } from 'drmq-client';
+
+const producer = new DRMQProducer("localhost:9092,localhost:9093");
+await producer.connect();
+
+// 1. Standard single-topic write
+const res = await producer.send("my-topic", Buffer.from("Hello DRMQ!"));
+console.log(\`Sent at offset \${res.offset}\`);
+
+// 2. Cross-Topic Atomic write
+const offsets = await producer.sendAtomic({
+  "orders": Buffer.from("order-123"),
+  "inventory": Buffer.from("reserve-sku-456")
+});
+console.log(\`Atomic commit successful! Offsets: \${JSON.stringify(offsets)}\`);`}
       />
     </div>
   );

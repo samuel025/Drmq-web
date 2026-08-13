@@ -52,6 +52,7 @@ const producer = new DRMQProducer("broker1:9092,broker2:9093,broker3:9094");`} /
         {[
           ['await connect()', 'Promise<void>', 'Opens the TCP connection. Throws DRMQConnectionError if no broker is reachable.'],
           ['await send(topic, payload, key?)', 'Promise<ProduceResponse>', 'Send payload (Uint8Array) to topic. Optionally attach a routing key. Check .success before using .offset.'],
+          ['await sendAtomic(payloads)', 'Promise<Record<string, number>>', 'Sends an atomic batch to multiple distinct topics. Expects a Record mapping topic -> Uint8Array payload. Guaranteed to commit or fail as a single unit at the Raft level.'],
           ['close()', 'void', 'Destroys the underlying TCP socket and clears any pending callbacks.'],
         ].map(([m, r, d]) => (
           <div key={m} className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-4">
@@ -108,6 +109,31 @@ async function main() {
     } else {
       console.error(\`Send failed: \${res.errorMessage}\`);
     }
+  } finally {
+    producer.close();
+  }
+}
+
+main().catch(console.error);`} />
+
+      <h3 className="text-xl font-semibold text-slate-200 mt-6 mb-3">Producer example 2 — Cross-Topic Atomic Transaction</h3>
+      <CodeBlock language="typescript" code={`import { DRMQProducer } from './client';
+
+async function main() {
+  const producer = new DRMQProducer("localhost:9092");
+  await producer.connect();
+
+  try {
+    // Record of topic -> payload buffer
+    const batch: Record<string, Uint8Array> = {
+      "orders": Buffer.from("order-123"),
+      "inventory": Buffer.from("reserve-sku-456")
+    };
+    
+    // Await the Raft commit across both topics simultaneously
+    const offsets = await producer.sendAtomic(batch);
+    
+    console.log("Atomic commit successful! Offsets:", offsets);
   } finally {
     producer.close();
   }

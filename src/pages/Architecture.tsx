@@ -25,10 +25,10 @@ export function Architecture() {
         <div className="border border-emerald-500/20 bg-emerald-500/5 rounded-lg p-6">
           <div className="text-sm font-bold text-emerald-400 mb-3 uppercase tracking-wider">Consensus Layer</div>
           <p className="text-slate-300 leading-relaxed">
-            RaftNode implements the full Raft protocol: leader election with Pre-Vote, log 
-            replication with batched AppendEntries (capped at MAX_ENTRIES_PER_RPC = 500 entries), 
-            InstallSnapshot for severely lagging followers, and durable persistence of currentTerm, 
-            votedFor, commitIndex, and lastApplied across restarts. The consensus layer is the 
+            RaftNode implements the full Raft protocol: leader election with the **Pre-Vote extension** (preventing disruption from partitioned nodes), 
+            log replication with batched AppendEntries (capped at 500 entries per RPC), 
+            and **Incremental State Reconstruction** (via per-topic segment transfers) for severely lagging followers. 
+            It durably persists currentTerm, votedFor, commitIndex, and lastApplied across restarts. The consensus layer is the 
             gatekeeper — no write reaches the storage layer without first being committed by a quorum.
           </p>
         </div>
@@ -40,7 +40,8 @@ export function Architecture() {
             Each topic is a directory of .log files (100MB each). The RaftLog itself uses a 
             separate binary-encoded file to persist Raft log entries. Consumer group offsets 
             are also persisted inside the Raft log as CommitOffsetCommand entries, giving them 
-            the same durability guarantee as messages.
+            the same durability guarantee as messages. 
+            It also handles **Cross-Topic Atomic Batches** by staging writes into a `.atomic-intent` file to guarantee crash consistency across multiple topics.
           </p>
         </div>
       </div>
@@ -50,12 +51,12 @@ export function Architecture() {
         <div className="absolute top-0 bottom-0 left-[15px] w-px bg-slate-800 z-0 hidden sm:block" />
         
         {[
-          { step: '1', actor: 'Client', bg: 'bg-slate-800/80', border: 'border-slate-700', desc: 'Sends a ProduceRequest (topic + payload bytes) over TCP to any broker node.' },
+          { step: '1', actor: 'Client', bg: 'bg-slate-800/80', border: 'border-slate-700', desc: 'Sends a ProduceRequest or AtomicProduceRequest (topic + payload bytes) over TCP to any broker node.' },
           { step: '2', actor: 'Broker — not leader', bg: 'bg-[#1E293B]', border: 'border-slate-700/50', desc: 'If the receiving broker is a follower, it immediately responds NOT_LEADER:<addr>. The client SDK transparently redirects to the leader.' },
-          { step: '3', actor: 'Leader — RaftNode', bg: 'bg-cyan-900/20', border: 'border-cyan-800/50', desc: 'Appends the entry to its local RaftLog, then fires parallel AppendEntries RPCs to all followers. The request is held open.' },
+          { step: '3', actor: 'Leader — RaftNode', bg: 'bg-cyan-900/20', border: 'border-cyan-800/50', desc: 'Appends the entry (or the atomic multi-topic batch) to its local RaftLog, then fires parallel AppendEntries RPCs to all followers. The request is held open.' },
           { step: '4', actor: 'Followers — RaftNode', bg: 'bg-[#1E293B]', border: 'border-slate-700/50', desc: 'Each follower writes the entry to its local log and replies AppendEntriesResponse(success=true).' },
-          { step: '5', actor: 'Leader — Quorum reached', bg: 'bg-cyan-900/20', border: 'border-cyan-800/50', desc: 'Once a majority of nodes have acknowledged, the Leader advances its commitIndex, applies the entry to the MessageStore, and assigns a monotonically increasing global offset.' },
-          { step: '6', actor: 'Client', bg: 'bg-emerald-900/20', border: 'border-emerald-800/50', desc: 'Receives ProduceResponse(success=true, offset=N). The message is now durable and visible to consumers.' },
+          { step: '5', actor: 'Leader — Quorum reached', bg: 'bg-cyan-900/20', border: 'border-cyan-800/50', desc: 'Once a majority of nodes have acknowledged, the Leader advances its commitIndex. If atomic, it writes an intent file, applies the entry across all topics in the MessageStore, and cleans up the intent.' },
+          { step: '6', actor: 'Client', bg: 'bg-emerald-900/20', border: 'border-emerald-800/50', desc: 'Receives ProduceResponse(success=true, offset=N). The message(s) are now durable and visible to consumers.' },
         ].map(({ step, actor, bg, border, desc }) => (
           <div key={step} className="flex gap-4 relative z-10 mb-4 group">
             <div className="flex flex-col items-center shrink-0 mt-1">

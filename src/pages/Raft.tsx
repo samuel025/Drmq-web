@@ -58,22 +58,19 @@ export function Raft() {
         </p>
       </div>
 
-      <h2 className="text-xl md:text-2xl font-semibold text-slate-100 mb-4 mt-10">Log Compaction & Snapshots</h2>
+      <h2 className="text-xl md:text-2xl font-semibold text-slate-100 mb-4 mt-10">Log Compaction & Incremental State Reconstruction</h2>
       <p className="text-slate-300 mb-4 leading-relaxed">
         The Raft log grows continuously as messages are appended. To prevent unbounded disk usage,
         DRMQ compacts the <code>RaftLog</code> by truncating entries that have already been applied 
-        to the <code>MessageStore</code>.
+        to the persistent <code>MessageStore</code> (capped at a 512MB threshold).
       </p>
       
       <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-6 my-6">
-        <h3 className="font-semibold text-white mb-2">Zero-Downtime Snapshot Installation</h3>
+        <h3 className="font-semibold text-white mb-2">Incremental State Reconstruction</h3>
         <p className="text-slate-300 leading-relaxed text-sm">
-          <strong>State Transfer:</strong> When a follower falls behind and its required entries have been 
-          compacted from the leader's Raft log, the leader initiates an <code>InstallSnapshotRequest</code> stream. 
-          The leader dynamically zips its persistent <code>MessageStore</code> and <code>OffsetManager</code> data 
-          into a single archive, transmitting it in 2MB chunks over the network. Upon receiving the final chunk, 
-          the follower safely and atomically hot-swaps its current storage directories with the snapshot contents. 
-          Furthermore, DRMQ intelligently marks peers receiving large snapshots as "in-flight" so the leader does not accidentally lose quorum during heavy disk I/O.
+          <strong>Segment Transfer:</strong> Traditional Raft relies on monolithic snapshot archives to catch up severely lagging followers, which can cause severe Out-Of-Memory (OOM) errors in large datasets. DRMQ replaces this with <strong>Incremental State Reconstruction</strong>. 
+          When a follower falls behind, the leader streams the required state dynamically by transferring individual, bounded <code>.log</code> segments on a per-topic basis via <code>IncrementalSnapshotRequest</code>. 
+          The follower receives a manifest, securely downloads only the missing segments, and atomically reconciles its local storage directories without dropping offline or running out of heap memory.
         </p>
       </div>
     </div>

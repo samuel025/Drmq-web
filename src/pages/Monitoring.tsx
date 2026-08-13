@@ -6,7 +6,7 @@ export function Monitoring() {
       <div className="inline-block text-xs font-mono tracking-widest text-cyan-500 border border-cyan-500/30 bg-cyan-500/10 rounded px-3 py-1 mb-4">
         MONITORING
       </div>
-      <h1 className="text-4xl font-bold text-white mb-6">Prometheus Metrics</h1>
+      <h1 className="text-4xl font-bold text-white mb-6">Monitoring & Telemetry</h1>
       <p className="text-lg text-slate-300 mb-8 leading-relaxed">
         Every DRMQ broker node ships with a built-in Prometheus metrics endpoint powered by Micrometer. Metrics are enabled by default and start serving as soon as the broker starts.
       </p>
@@ -51,6 +51,24 @@ export function Monitoring() {
       <CodeBlock 
         language="bash"
         code={`./mvnw -pl drmq-broker exec:java -Dexec.args="--port 9092 --data-dir ./data-1 --metrics-port 8080"`}
+      />
+      <h2 className="text-2xl font-semibold text-slate-100 mt-10 mb-4">Real-Time Telemetry Dashboard</h2>
+      <p className="text-slate-300 mb-4 leading-relaxed">
+        DRMQ ships with a dedicated real-time Telemetry Dashboard. It connects directly to the broker's embedded WebSocket server to stream metrics instantly without polling.
+      </p>
+      <ul className="list-disc list-inside text-slate-300 space-y-2 mb-8 ml-2">
+        <li><strong>Live Cluster View:</strong> See which node is the current Leader and watch followers sync in real-time.</li>
+        <li><strong>Throughput Graphs:</strong> Visualizes messages produced vs. consumed per second.</li>
+        <li><strong>Offset Tracking:</strong> Monitor consumer group lag across multiple topics.</li>
+      </ul>
+      <p className="text-slate-300 mb-4 leading-relaxed">
+        To launch the dashboard, open the <code>drmq-dashboard</code> module:
+      </p>
+      <CodeBlock 
+        language="bash"
+        code={`cd drmq-dashboard
+npm install
+npm run dev`}
       />
     </div>
   );

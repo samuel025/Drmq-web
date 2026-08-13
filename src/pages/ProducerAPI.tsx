@@ -37,6 +37,7 @@ DRMQProducer()                        // defaults to localhost:9092`} />
           ['send(String topic, String message)', 'CompletableFuture<SendResult>', 'Encodes message as UTF-8 and asynchronously queues it for batching.'],
           ['send(String topic, byte[] payload)', 'CompletableFuture<SendResult>', 'Asynchronously queues a raw byte payload.'],
           ['send(String topic, byte[] payload, String key)', 'CompletableFuture<SendResult>', 'Sends raw bytes with an optional routing key (pass null to omit).'],
+          ['sendAtomic(Map<String, byte[]> payloads)', 'CompletableFuture<Map<String, Long>>', 'Sends an atomic batch to multiple distinct topics. Guaranteed to commit or fail as a single unit at the Raft level.'],
           ['isConnected()', 'boolean', 'Returns true when the underlying socket is open.'],
           ['close()', 'void', 'Closes the TCP connection. Implements AutoCloseable.'],
         ].map(([m, r, d]) => (
@@ -86,6 +87,24 @@ try (DRMQProducer producer = new DRMQProducer("localhost:9092,localhost:9093")) 
 } catch (Exception e) {
     e.printStackTrace();
 }`} />
+
+      <h3 className="text-xl font-semibold text-slate-200 mt-6 mb-3">Producer Example 2 — Cross-Topic Atomic Transaction</h3>
+      <p className="text-slate-300 mb-4">DRMQ allows you to write to multiple topics atomically. The entire batch is committed to the Raft log as a single unit and recovered atomically via intent files.</p>
+      <CodeBlock language="java" code={`try (DRMQProducer producer = new DRMQProducer("localhost:9092")) {
+    producer.connect();
+    
+    Map<String, byte[]> atomicBatch = new HashMap<>();
+    atomicBatch.put("orders", "order-123".getBytes());
+    atomicBatch.put("inventory", "reserve-sku-456".getBytes());
+    
+    // Block on future to await Raft consensus
+    Map<String, Long> offsets = producer.sendAtomic(atomicBatch).get(); 
+    
+    System.out.println("Atomic commit successful! Offsets: " + offsets);
+} catch (Exception e) {
+    e.printStackTrace();
+}`} />
+
 
       <hr className="border-slate-700/50 my-10" />
       <h2 className="text-2xl font-semibold text-slate-100 mb-4">DRMQConsumer</h2>
