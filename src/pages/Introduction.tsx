@@ -45,8 +45,11 @@ export function Introduction() {
       </ul>
 
       <h2 className="text-2xl font-semibold text-slate-100 mt-10 mb-4">So, What Makes DRMQ Special?</h2>
+      <p className="text-slate-300 mb-4 leading-relaxed">
+        While high-throughput message queues like Apache Kafka are built for raw streaming scale across multi-partition clusters, <strong>DRMQ is designed specifically for environments where strict cross-topic atomicity and linear consensus safety take priority over extreme write throughput</strong>.
+      </p>
       <p className="text-slate-300 mb-8 leading-relaxed">
-        There are many message queues out there, but DRMQ focuses on <strong>Reliability and Simplicity</strong>. Standard message queues often become a single point of failure themselves. DRMQ solves this by using a cluster of multiple servers working together in unison (powered by a consensus algorithm called Raft). If one server catches fire or loses power, the other servers immediately take over. You will never lose a message, and your messages will always be processed in the exact order they were received.
+        By placing topic logs, consumer offset state, and multi-topic operations into a single unified Raft consensus log, DRMQ eliminates the need for complex, failure-prone Two-Phase Commit (2PC) transaction coordinators. If one broker loses power, the remaining cluster seamlessly maintains complete state consistency without partial commits or split-brain metadata.
       </p>
 
       <h2 className="text-2xl font-semibold text-slate-100 mt-10 mb-6">Core Capabilities</h2>
