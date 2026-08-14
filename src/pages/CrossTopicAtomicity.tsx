@@ -14,10 +14,13 @@ export function CrossTopicAtomicity() {
 
       <h2 className="text-2xl font-semibold text-slate-100 mt-10 mb-4">Why is this important?</h2>
       <p className="text-slate-300 mb-4 leading-relaxed">
-        In distributed systems, microservices frequently need to update multiple entities simultaneously. For example, in an e-commerce platform, placing an order might require appending a message to an <code>orders</code> topic and an <code>inventory-deductions</code> topic.
+        In distributed microservice architectures, business operations frequently span multiple entities. For example, placing an order requires publishing to an <code>orders</code> topic and an <code>inventory-deductions</code> topic.
+      </p>
+      <p className="text-slate-300 mb-4 leading-relaxed">
+        <strong>The 2PC Coordinator Problem (Apache Kafka)</strong>: Kafka scales throughput via partitioned topic logs. However, atomic multi-topic operations require external Two-Phase Commit (2PC) transaction coordinators, transaction marker records, and state tracking topics (<code>__transaction_state</code>). This introduces coordinator failure modes, latency penalties, and risks of partial commit states if a coordinator fails mid-flight.
       </p>
       <p className="text-slate-300 mb-8 leading-relaxed">
-        If the broker crashes in between these two writes, the system enters an inconsistent state: an order was placed, but the inventory was never deducted. Cross-topic atomicity guarantees that even if the broker's power cord is pulled mid-write, the system remains perfectly consistent.
+        <strong>The DRMQ Single-Raft Advantage</strong>: DRMQ trades multi-partition raw throughput for <strong>zero-2PC atomic safety</strong>. Cross-topic batches are proposed and committed in a single Raft log entry. Either all messages across all requested topics commit, or none do—eliminating 2PC coordinator failure windows entirely.
       </p>
 
       <h2 className="text-2xl font-semibold text-slate-100 mt-10 mb-4">How it works</h2>
