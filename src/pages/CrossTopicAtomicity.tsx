@@ -26,10 +26,10 @@ export function CrossTopicAtomicity() {
       <h2 className="text-2xl font-semibold text-slate-100 mt-10 mb-4">How it works</h2>
       <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-5 mb-8">
         <ol className="list-decimal list-inside text-slate-300 space-y-3">
-          <li><strong>Intent Phase:</strong> The broker creates a temporary <code>.atomic-intent</code> file on disk containing all the messages and their target topics.</li>
           <li><strong>Raft Consensus:</strong> The atomic batch is appended to the Raft log as a single entry and replicated across the cluster.</li>
           <li><strong>Application Phase:</strong> Once a quorum is reached, the leader applies the entry, appending the messages into their respective topic segments.</li>
-          <li><strong>Cleanup:</strong> The intent file is safely deleted. If a crash occurs during step 3, the broker will detect the lingering intent file on reboot and replay it idempotently.</li>
+          <li><strong>Durability Marker:</strong> After all segments are written, a <code>.atomic-done</code> completion marker is created and the cross-topic batch becomes visible to consumers.</li>
+          <li><strong>Crash Recovery:</strong> If a crash occurs during step 2 before the marker is written, the broker detects the partial apply on reboot and safely truncates the unfinished batch.</li>
         </ol>
       </div>
 

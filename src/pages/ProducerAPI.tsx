@@ -91,7 +91,7 @@ try (DRMQProducer producer = new DRMQProducer("localhost:9092,localhost:9093")) 
 }`} />
 
       <h3 className="text-xl font-semibold text-slate-200 mt-6 mb-3">Producer Example 2 — Cross-Topic Atomic Transaction</h3>
-      <p className="text-slate-300 mb-4">DRMQ allows you to write to multiple topics atomically. The entire batch is committed to the Raft log as a single unit and recovered atomically via intent files.</p>
+      <p className="text-slate-300 mb-4">DRMQ allows you to write to multiple topics atomically. The entire batch is committed to the Raft log as a single unit and strictly isolated from consumers until marked durable.</p>
       <CodeBlock language="java" code={`try (DRMQProducer producer = new DRMQProducer("localhost:9092")) {
     producer.connect();
     
