@@ -6,7 +6,7 @@ export function PythonClient() {
       <div className="inline-block text-xs font-mono tracking-widest text-cyan-500 border border-cyan-500/30 bg-cyan-500/10 rounded px-3 py-1 mb-4">PYTHON SDK</div>
       <h1 className="text-4xl font-bold text-white mb-6">Python Client SDK</h1>
       <p className="text-slate-300 mb-6">
-        The DRMQ Python client lets you send and receive messages using the same TCP/Protobuf protocol as the Java SDK. It lives in the <code>drmq-python-client/</code> directory and requires no external broker-specific package — only the standard <code>protobuf</code> library. Both <code>DRMQProducer</code> and <code>DRMQConsumer</code> inherit from a shared <code>DRMQClient</code> base that manages connection pooling, bootstrap-server rotation, and transparent leader redirection via typed <code>ErrorCode</code>s.
+        The DRMQ Python client lets you send and receive messages using the same TCP/Protobuf protocol as the Java, Go, and TypeScript SDKs. It lives in the <code>drmq-python-client/</code> directory and requires no external broker-specific package — only the standard <code>protobuf</code> library. Both <code>DRMQProducer</code> and <code>DRMQConsumer</code> inherit from a shared <code>DRMQClient</code> base that manages connection pooling, bootstrap-server rotation, and transparent leader redirection via typed <code>ErrorCode</code>s.
       </p>
 
       <div className="bg-cyan-500/10 rounded-lg p-4 mt-4 mb-8">
