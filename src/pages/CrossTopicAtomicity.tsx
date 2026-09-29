@@ -95,6 +95,40 @@ const offsets = await producer.sendAtomic({
 console.log("Committed offsets:", offsets);`}
           />
         </div>
+
+        <div>
+          <h3 className="text-lg font-medium text-slate-200 mb-3">Go SDK</h3>
+          <CodeBlock 
+            language="go"
+            code={`import (
+    "fmt"
+    "log"
+    "time"
+
+    drmq "github.com/drmq/drmq-go-client"
+)
+
+producer, err := drmq.NewProducer(drmq.ProducerConfig{
+    BootstrapServers: "localhost:9092",
+})
+if err != nil {
+    log.Fatal(err)
+}
+defer producer.Close()
+producer.Connect()
+
+atomicFuture := producer.SendAtomic(map[string][]byte{
+    "orders":    []byte("new-order-123"),
+    "inventory": []byte("deduct-sku-abc"),
+})
+
+offsets, err := atomicFuture.GetWithTimeout(5 * time.Second)
+if err != nil {
+    log.Fatalf("Atomic send failed: %v", err)
+}
+fmt.Printf("Committed offsets: %v\\n", offsets)`}
+          />
+        </div>
       </div>
     </div>
   );

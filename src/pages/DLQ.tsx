@@ -57,6 +57,38 @@ export function DLQ() {
     e.printStackTrace();
 }`} />
 
+      <h3 className="text-lg font-medium text-slate-200 mt-6 mb-3">Go SDK Example</h3>
+      <CodeBlock language="go" code={`consumer, err := drmq.NewConsumer(drmq.ConsumerConfig{
+    BootstrapServers: "localhost:9092,localhost:9093",
+    ConsumerGroup:    "order-processors",
+})
+if err != nil {
+    log.Fatal(err)
+}
+defer consumer.Close()
+consumer.Connect()
+consumer.Subscribe("orders")
+
+for {
+    messages, err := consumer.Poll()
+    if err != nil {
+        continue
+    }
+    for _, msg := range messages {
+        if err := processOrder(msg.Payload); err != nil {
+            // Explicitly reject: broker increments attempt count and routes to DLQ if max reached
+            routedToDLQ, nackErr := consumer.Nack("orders", msg.Offset)
+            if nackErr != nil {
+                log.Printf("NACK failed: %v", nackErr)
+            } else if routedToDLQ {
+                log.Printf("Poison pill routed to DLQ topic: offset %d", msg.Offset)
+            }
+        } else {
+            consumer.Commit("orders", msg.Offset+1)
+        }
+    }
+}`} />
+
       <h2 className="text-2xl font-semibold text-slate-100 mt-10 mb-4">Consuming from the DLQ Topic</h2>
       <p className="text-slate-300 mb-4">The DLQ topic is a standard DRMQ topic. Subscribe to it with a separate consumer to inspect or reprocess failed messages:</p>
       <CodeBlock language="java" code={`try (DRMQConsumer dlqConsumer = new DRMQConsumer("localhost:9092,localhost:9093", "dlq-inspector")) {

@@ -11,6 +11,7 @@ import { ProducerAPI } from './pages/ProducerAPI';
 import { ConsumerAPI } from './pages/ConsumerAPI';
 import { PythonClient } from './pages/PythonClient';
 import { TypeScriptClient } from './pages/TypeScriptClient';
+import { GoClient } from './pages/GoClient';
 import { Raft } from './pages/Raft';
 import { Storage } from './pages/Storage';
 import { Groups } from './pages/Groups';
@@ -39,6 +40,7 @@ function App() {
           <Route path="consumer" element={<ConsumerAPI />} />
           <Route path="python-client" element={<PythonClient />} />
           <Route path="typescript-client" element={<TypeScriptClient />} />
+          <Route path="go-client" element={<GoClient />} />
           <Route path="raft" element={<Raft />} />
           <Route path="storage" element={<Storage />} />
           <Route path="groups" element={<Groups />} />

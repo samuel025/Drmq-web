@@ -6,7 +6,7 @@ export function TypeScriptClient() {
       <div className="inline-block text-xs font-mono tracking-widest text-cyan-500 border border-cyan-500/30 bg-cyan-500/10 rounded px-3 py-1 mb-4">TYPESCRIPT SDK</div>
       <h1 className="text-4xl font-bold text-white mb-6">TypeScript SDK</h1>
       <p className="text-slate-300 mb-6">
-        The DRMQ TypeScript client provides a fully async, promise-based API for producing and consuming messages against a DRMQ broker cluster. It lives in the <code>drmq-ts-client/</code> directory and communicates using the same TCP/Protobuf protocol as the Java and Python SDKs. Both <code>DRMQProducer</code> and <code>DRMQConsumer</code> extend a shared <code>DRMQClient</code> base that manages connection lifecycle, bootstrap-server rotation, and transparent leader redirection via typed <code>ErrorCode</code>s.
+        The DRMQ TypeScript client provides a fully async, promise-based API for producing and consuming messages against a DRMQ broker cluster. It lives in the <code>drmq-ts-client/</code> directory and communicates using the same TCP/Protobuf protocol as the Java, Go, and Python SDKs. Both <code>DRMQProducer</code> and <code>DRMQConsumer</code> extend a shared <code>DRMQClient</code> base that manages connection lifecycle, bootstrap-server rotation, and transparent leader redirection via typed <code>ErrorCode</code>s.
       </p>
 
       <div className="bg-cyan-500/10 rounded-lg p-4 mt-4 mb-8">

@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Outlet, useLocation, Link } from 'react-router-dom';
 import { Navbar } from './Navbar';
-import { Sidebar, NAVIGATION } from './Sidebar';
+import { Sidebar } from './Sidebar';
+import { NAVIGATION } from './navigation';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 export function Layout() {

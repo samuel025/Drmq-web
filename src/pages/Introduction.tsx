@@ -84,6 +84,12 @@ export function Introduction() {
             Produce messages to multiple distinct topics in a single, atomic operation. Guaranteed to commit or fail as a single unit at the Raft level.
           </p>
         </div>
+        <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-5">
+          <div className="text-sm font-bold text-cyan-400 mb-2">Multi-Language SDK Ecosystem</div>
+          <p className="text-sm text-slate-400 leading-relaxed">
+            First-class clients in Java, Go, Python, and TypeScript featuring transparent leader failover, client-side batching, and consumer groups.
+          </p>
+        </div>
       </div>
 
       <h2 className="text-2xl font-semibold text-slate-100 mt-10 mb-4">Quick Start Example</h2>
